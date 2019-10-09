@@ -1,0 +1,311 @@
+---
+title: |
+  | Statistical Programming 
+  | and Open Science Methods
+subtitle: |
+  | Writing readable and reusable code
+author: | 
+  | Joachim Gassen 
+  | Humboldt-Universität zu Berlin
+date:  |
+  | `r loc <- Sys.getlocale(category = "LC_TIME"); Sys.setlocale("LC_TIME", "C"); fdate <- format(Sys.time(), '%B %d, %Y'); Sys.setlocale("LC_TIME", loc); fdate`
+  
+output: 
+  beamer_presentation
+
+header-includes:
+- \usepackage{booktabs}
+- \usepackage{graphicx}
+- \usepackage{xcolor}
+- \usepackage{array}
+- \usepackage{longtable}
+- \usepackage{multirow}
+- \usepackage{wrapfig}
+- \usepackage{float}
+- \usepackage{colortbl}
+- \usepackage{pdflscape}
+- \usepackage{tabu}
+- \usepackage{threeparttable}
+- \usepackage{threeparttablex}
+- \usepackage[normalem]{ulem}
+- \usepackage{makecell}
+- \setbeamertemplate{itemize subitem}{-}
+- \titlegraphic{\includegraphics[width=6cm]{media/trr266_logo_white_background.png}}
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, table.align = "center",  message = FALSE, error = FALSE, warning = FALSE, clean = FALSE)
+library(knitr)
+library(kableExtra)
+library(tufte)
+library(ggmap)
+opts_knit$set(fig.pos = 'h')
+source("../code/utils.R")
+
+# The following allows one to use Stata in RMarkdown 
+# Nice but not open science ;-)
+# original version
+# devtools::install_github("hemken/Statamarkdown")
+# Fork that fixed Mac bug non finding the Stata executable
+# devtools::install_github("remlapmot/Statamarkdown",  ref = "macos-bug-fixes")
+# library(Statamarkdown)
+
+```
+
+## Time table October 11
+
+``` {r ttable, echo = FALSE}
+df <- sposm19_time_table %>%
+  filter(day(dtime) == day("2019-10-11")) %>%
+  mutate(dtime = format(dtime, "%H:%M"))
+
+breaks <- which(str_detect(df$title, "Lunch") | str_detect(df$title, "Coffee"))
+
+names(df) <- c("When?", "What?")
+kable(df, booktabs = TRUE, linesep = "")  %>%
+  kable_styling(latex_options = c("striped", "scale_down"),
+                stripe_index = breaks) %>%
+  row_spec(1, background = trr266_lightpetrol)
+```
+
+
+## Most of us have been going through loads of this
+
+\tiny
+```
+clear all
+import excel "clean_data\interviews_quant_data_final_15-09-16.xlsx", sheet("MainData") firstrow
+gen treated_case = .
+replace treated_case = 1 if treatment == "1" & (obj_val == 1 & obj_perf_mgt == 0 & incent_finacc == 0 & incent_intprod == 1)
+replace treated_case = 2 if treatment == "2" & (obj_val == 0 & obj_perf_mgt == 1 & incent_finacc == 0 & incent_intprod == 1)
+replace treated_case = 3 if treatment == "3" & (obj_val == 1 & obj_perf_mgt == 0 & incent_finacc == 1 & incent_intprod == 0)
+replace treated_case = 4 if treatment == "4" & (obj_val == 0 & obj_perf_mgt == 1 & incent_finacc == 1 & incent_intprod == 0)
+gen treated = treated_case != .
+gen exp_pilot = (treatment == "C" | treatment == "V")
+gen failed_man_checks = !exp_pilot & treated_case == .
+gen highest_college_ed = "none"
+replace highest_college_ed = "bachelor" if bachelor==1
+replace highest_college_ed = "masters" if masters==1
+replace highest_college_ed = "phd" if phd==1
+gen acctg_expertise = "none"
+replace acctg_expertise = "intermediate (bus/econ and/or CFA)" if cfa | business_econ
+replace acctg_expertise = "advanced (actg degree or acctg responsibility in current position)" if acctg_qual | fin_rep_job_resp
+gen occupation = ""
+replace occupation = "fund manager" if (fund_manager | (value_funds_direct_mgmtM >0 & value_funds_direct_mgmtM < .))
+replace occupation = "analyst buy-side" if (occupation != "fund manager" & analyst  == 1 & buy_side ==1)
+replace occupation = "analyst sell-side" if (occupation == "" & analyst  == 1 & sell_side ==1)
+replace occupation = "other" if occupation == ""
+gen asset_focus = ""
+replace asset_focus = "equity only" if (equity == 1 & debt == 0)
+replace asset_focus = "debt only" if (equity == 0 & debt == 1)
+replace asset_focus = "equity and debt" if (equity == 1 & debt == 1)
+replace asset_focus = "other" if (equity == 0 & debt == 0)
+gen firm_focus = ""
+replace firm_focus = "public only" if (public == 1 & private == 0)
+replace firm_focus = "private only" if (public == 0 & private == 1)
+replace firm_focus = "public and private" if (public == 1 & private == 1)
+replace firm_focus = "other" if (public == 0 & private == 0)
+```
+\normalsize
+
+
+## Open Science needs readable code!
+
+* To make an impact, code needs to be digestible for the reader
+* Besides a well-designed project setup, accessible code is a key 
+ingredient to enable others to contribute to your work
+
+\vspace{48pt}
+
+\center
+But what are the key ingredients to make your code readable and reusable?
+
+## Rule #1: Use a style guide
+
+Each serious programming language has established style guides, e.g.:
+
+\vspace{24pt}
+
+- https://google.github.io/styleguide/ for various languages 
+- https://style.tidyverse.org for R
+- https://www.python.org/dev/peps/pep-0008/ The "official" python style guide
+
+\vspace{24pt}
+\centering
+Linters can help with getting your code in shape
+
+
+## Rule #2: Write code as you speak
+
+\footnotesize
+```{r, eval = FALSE}
+# Bad:
+
+df <- read_csv("data/sub.csv")
+x <- nrow(df[!duplicated(df[, 3:4]), 3:4])
+sprintf("There are %d registrants", x)
+
+# Good: 
+
+read_csv("data/sub.csv") %>%
+  select(cik, name) %>%
+  distinct() %>%
+  nrow() -> count_sec_reg
+
+sprintf("There are %d registrants", count_sec_reg)
+```
+\normalsize
+
+
+## Rule #3: Use functions for reusable steps
+
+\footnotesize
+```{r, eval = FALSE}
+count_distinct_obs <- function(df, ...) {
+  as_tibble(df) %>%
+    select(...) %>%
+    distinct() %>%
+    nrow()
+}
+
+read_csv("data/sub.csv") %>%
+  count_distinct_obs(cik, name) -> count_sec_reg
+
+sprintf("There are %d registrants", count_sec_reg)
+```
+\normalsize
+
+
+## Rule #4: Keep functions short and indentation levels low
+
+\scriptsize
+```{r, eval = FALSE}
+# Bad:
+
+if (use_server_ok()) {
+  if (ping_server_ok()) {
+    if (connect_server_ok()) {
+      df <- read_server_data()
+    } else {
+      if (fall_back_ok()) {
+        df <- read_fall_back()
+      } else stop("No data")
+    }
+  } else {
+    if (fall_back_ok()) {
+      df <- read_fall_back()
+    } else stop("No data")
+  }
+} else {
+  if (fall_back_ok()) {
+    df <- read_fall_back()
+  } else stop("No data")
+}
+do_something_with_data(df)
+```
+\normalsize
+
+
+## Rule #4: Keep functions short and indentation levels low
+
+\scriptsize
+```{r, eval = FALSE}
+# Good:
+
+test_server_ok <- function{
+  if (!ping_server_ok()) return(FALSE)
+  if (!connect_server_ok()) return(FALSE)
+  return(TRUE)
+}
+
+get_data <- function() {
+  if (use_server_ok()) {
+    if (test_server_ok()) return(read_server_data())
+  }
+  if (fall_back_ok()) return(read_fall_back())
+  else stop("No data")
+} 
+
+get_data() %>%
+  do_something_with_data()
+```
+\normalsize
+
+
+## Rule #5: Check for errors
+
+\footnotesize
+```{r, collapse = TRUE}
+count_distinct_obs <- function(df, ...) {
+  as_tibble(df) %>%
+    select(...) %>%
+    distinct() %>%
+    nrow()
+}
+
+count_distinct_obs(42)
+```
+\normalsize
+
+
+## Rule #5: Check for errors
+
+\scriptsize
+```{r, error = TRUE, collapse = TRUE}
+count_distinct_obs <- function(df, ...) {
+  if (!is.data.frame(df)) {
+    stop("First parameter must be a data frame", call. = FALSE) 
+  }
+  if (missing(...)) {
+    stop("Must have at least one column variable", call. = FALSE)
+  }
+
+  df %>%
+      select(...) %>%
+      distinct() %>%
+      nrow()
+}
+
+count_distinct_obs(42)
+count_distinct_obs(data.frame(a = 1:10))
+count_distinct_obs(data.frame(a = 1:10), b)
+count_distinct_obs(data.frame(a = 1:10), a)
+```
+\normalsize
+
+
+## Rule #6: Don't document code, document functions
+
+\tiny
+```{r, eval = FALSE}
+#' @title Counts the destinct observations for a sub-set of a data frame
+#'
+#' @description
+#' Reads a data frame and counts the number of distinct observations based 
+#' on a subset of provided columns.
+#' @param df Data frame
+#' @param ... The list of columns to include (cannot be empty)
+#' @return The number of observations that are not identical across the selected
+#' columns
+#'
+#' @examples
+#' df <- data.frame(a = rnorm(5), b = 1, c = c(1, 2, 1, 2, 3))
+#' count_distinct_obs(df, b, c)
+#' @export
+
+count_distinct_obs <- function(df, ...) {
+  if (!is.data.frame(df)) {
+    stop("First parameter must be a data frame", call. = FALSE) 
+  }
+  if (missing(...)) {
+    stop("Must have at least one column variable", call. = FALSE)
+  }
+
+  df %>%
+      select(...) %>%
+      distinct() %>%
+      nrow()
+}
+```
+\normalsize

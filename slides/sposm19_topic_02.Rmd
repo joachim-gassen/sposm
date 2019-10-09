@@ -1,0 +1,358 @@
+---
+title: |
+  | Statistical Programming 
+  | and Open Science Methods
+subtitle: |
+  | Using Git and Github
+author: | 
+  | Joachim Gassen 
+  | Humboldt-Universität zu Berlin
+date:  |
+  | `r loc <- Sys.getlocale(category = "LC_TIME"); Sys.setlocale("LC_TIME", "C"); fdate <- format(Sys.time(), '%B %d, %Y'); Sys.setlocale("LC_TIME", loc); fdate`
+  
+output: 
+  beamer_presentation
+
+header-includes:
+- \usepackage{booktabs}
+- \usepackage{graphicx}
+- \usepackage{xcolor}
+- \usepackage{array}
+- \usepackage{longtable}
+- \usepackage{multirow}
+- \usepackage{wrapfig}
+- \usepackage{float}
+- \usepackage{colortbl}
+- \usepackage{pdflscape}
+- \usepackage{tabu}
+- \usepackage{threeparttable}
+- \usepackage{threeparttablex}
+- \usepackage[normalem]{ulem}
+- \usepackage{makecell}
+- \setbeamertemplate{itemize subitem}{-}
+- \titlegraphic{\includegraphics[width=6cm]{media/trr266_logo_white_background.png}}
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, table.align = "center",  message = FALSE, error = FALSE, warning = FALSE, clean = FALSE)
+library(knitr)
+library(kableExtra)
+library(tufte)
+opts_knit$set(fig.pos = 'h')
+source("../code/utils.R")
+
+# The following allows one to use Stata in RMarkdown 
+# Nice but not open science ;-)
+# original version
+# devtools::install_github("hemken/Statamarkdown")
+# Fork that fixed Mac bug non finding the Stata executable
+# devtools::install_github("remlapmot/Statamarkdown",  ref = "macos-bug-fixes")
+# library(Statamarkdown)
+
+```
+
+## Time table October 10
+
+``` {r ttable, echo = FALSE}
+df <- sposm19_time_table %>%
+  filter(day(dtime) == day("2019-10-10")) %>%
+  mutate(dtime = format(dtime, "%H:%M"))
+
+breaks <- which(str_detect(df$title, "Lunch") | str_detect(df$title, "Coffee"))
+
+names(df) <- c("When?", "What?")
+kable(df, booktabs = TRUE, linesep = "")  %>%
+  kable_styling(latex_options = c("striped", "scale_down"),
+                stripe_index = breaks) %>%
+  row_spec(4, background = trr266_lightpetrol)
+```
+
+## Disclaimer
+
+\center Some of the following, in particular the figures, are borrowed from:\center 
+Scott Chacon and Ben Straub (2014): Pro Git,
+https://git-scm.com/book/en/v2
+
+
+## The issue
+
+We all know these folders
+
+```
+joachim:project/paper$ ls
+
+paper_draft4_2019-08-17a.tex
+paper_draft4_2019-08-17a_jg.tex
+paper_draft3_dv_no_track_changes.tex
+thoughts-on-draft.txt
+paper_draft4_current.tex
+old_stuff/
+```
+
+## The solution
+
+The same folder with git:
+
+```
+joachim:project/paper$ ls -a
+.
+..
+.git/
+paper.tex
+
+```
+
+## Git is an open source distributed version control system
+
+\begin{center}
+\includegraphics[width=0.5\textwidth]{media/pro_git_fig_3.png} 
+\end{center}
+
+## Let's start
+
+TASK: Write code to import the data of the latest ZIP file from https://www.sec.gov/dera/data/financial-statement-data-sets.html
+
+## Your first commit
+
+* Tell git who you are
+
+\footnotesize 
+```
+joachim:$ git config --global user.name "Joachim Gassen"
+joachim:$ git config --global user.email "gassen@wiwi.hu-berlin.de"
+``` 
+\normalsize
+
+* Clone our project from Github
+
+\footnotesize
+```
+joachim:$ git clone https://github.com/joachim-gassen/sposm
+```
+\normalsize
+
+* Create a new code file in the `code` directory and add it to git (stage it)
+
+\footnotesize
+```
+joachim:$ cd sposm/code
+joachim:sposm/code$ nano read_sec_fin_stat_data.R
+joachim:sposm/code$ git add read_sec_fin_stat_data.R
+```
+\normalsize
+
+* Then commit your changes to your local repository
+
+\footnotesize
+```
+joachim:sposm/code$ git commit -m "Started on SEC import code" 
+```
+\normalsize
+
+
+## What have you just done?
+
+\begin{center}
+\includegraphics[width=\textwidth]{media/pro_git_fig_8.png} 
+\end{center}
+
+## Time to branch
+
+* Create a new branch and change to that branch
+
+\footnotesize
+```
+joachim:sposm/code$ git branch iss53
+joachim:sposm/code$ git checkout iss53
+```
+\normalsize
+
+\begin{center}
+\includegraphics[width=\textwidth]{media/pro_git_fig_19.png} 
+\end{center}
+
+## Make some commits
+
+* Make commits to branch
+
+\footnotesize
+```
+joachim:sposm/code$ nano read_sec_fin_stat_data.R
+joachim:sposm/code$ git add read_sec_fin_stat_data.R
+joachim:sposm/code$ git commit -m "Some new stuff on iss53"
+```
+\normalsize
+
+\begin{center}
+\includegraphics[width=\textwidth]{media/pro_git_fig_20.png} 
+\end{center}
+
+## And continue (on both branches)
+
+\footnotesize
+```
+joachim:sposm/code$ git checkout master
+joachim:sposm/code$ nano read_sec_fin_stat_data.R
+joachim:sposm/code$ git add read_sec_fin_stat_data.R
+joachim:sposm/code$ git commit -m "Some urgent hotfix"
+joachim:sposm/code$ git checkout iss53
+joachim:sposm/code$ nano read_sec_fin_stat_data.R
+joachim:sposm/code$ git add read_sec_fin_stat_data.R
+joachim:sposm/code$ git commit -m "Even more new stuff on iss53"
+```
+\normalsize
+
+\begin{center}
+\includegraphics[width=\textwidth]{media/pro_git_fig_23.png} 
+\end{center}
+
+## And now? Two Options: 1. Merge
+
+\footnotesize
+```
+joachim:sposm/code$ git checkout master
+joachim:sposm/code$ git merge iss53
+```
+\begin{center}
+\includegraphics[width=\textwidth]{media/pro_git_fig_25.png} 
+\end{center}
+```
+# delete the old branch
+joachim:sposm/code$ git branch -d iss53
+```
+\normalsize
+
+## This does not always work directly
+
+\footnotesize
+```
+joachim:sposm/code$ git merge iss53
+Auto-merging code/read_sec_fin_stat_data.R
+CONFLICT (content): Merge conflict in code/read_sec_fin_stat_data.R
+Automatic merge failed; fix conflicts and then commit the result.
+joachim:sposm/code$ nano read_sec_fin_stat_data.R
+```
+\normalsize
+
+* You actually have to work now
+
+\footnotesize
+```
+joachim:sposm/code$ nano read_sec_fin_stat_data.R
+
+# Editing file to remove conflicts (not always trivial)
+
+joachim:sposm/code$ git add read_sec_fin_stat_data.R
+joachim:sposm/code$ git commit -m "Merged iss53 into master"
+joachim:sposm/code$ git branch -d iss53
+```
+\normalsize
+
+## The second option: Rebase
+
+* Assume that you generated a new branch `experiment` and have reached the state below
+
+\begin{center}
+\includegraphics[width=\textwidth]{media/pro_git_fig_35.png} 
+\end{center}
+
+
+## Rebasing \dots
+
+\footnotesize
+```
+joachim:sposm/code$ git checkout experiment
+joachim:sposm/code$ git rebase master
+```
+\normalsize
+
+\begin{center}
+\includegraphics[width=\textwidth]{media/pro_git_fig_37.png} 
+\end{center}
+
+* This can create conflicts just like merging
+
+## \dots and fast-forward merging
+
+\footnotesize
+```
+joachim:sposm/code$ git checkout master
+joachim:sposm/code$ git merge experiment
+joachim:sposm/code$ git branch -d experiment
+```
+\normalsize
+
+\begin{center}
+\includegraphics[width=\textwidth]{media/pro_git_fig_38.png} 
+\end{center}
+
+
+## Using remote repositories: Collaborative approach
+
+\begin{center}
+\includegraphics[width=0.66\textwidth]{media/pro_git_fig_54.png} 
+\end{center}
+
+* All developers push to the same remote repository. Can be fast and efficient
+but requires that people know what they are doing as there is no central
+oversight
+
+\footnotesize
+```
+joachim:sposm/code$ git remote -v
+origin  https://github.com/joachim-gassen/sposm (fetch)
+origin  https://github.com/joachim-gassen/sposm (push)
+joachim:sposm/code$ git pull
+joachim:sposm/code$ git push
+```
+\normalsize
+
+
+## Using remote repositories: Fork & pull request approach
+
+\begin{center}
+\includegraphics[width=0.66\textwidth]{media/pro_git_fig_55.png} 
+\end{center}
+
+* Developers push their own forks of a central repository. Maintainer of central repository decides on pull requests from these remote repositories. Pull requests are communicated via Github (or by other means)
+* For more details see: https://gist.github.com/Chaser324/ce0505fbed06b947d962
+
+\scriptsize
+```
+# Fork repository on github and clone your local fork
+joachim:sposm$ git remote add up https://github.com/joachim-gassen/sposm
+joachim:sposm$ git fetch up
+joachim:sposm$ git checkout master
+joachim:sposm$ git merge up/master
+joachim:sposm$ git push
+# Issue pull request to get your stuff into the central repository
+```
+\normalsize
+
+
+## Additional stuff that Github brings to the party
+
+* Besides providing publicly hosted repositories Github provides several features that make collaboration easier
+* Web interface for exploring repositories, making commits and issuing pull requests
+* Issue tracking system
+* Website hosting for code documentation
+* ...
+  
+## Assignment for the break
+
+Use the 2019Q2 SEC data to extract current quarterly revenues of U.S. based firms. Try to replicate the following methodology.
+
+We use the SEC Financial Statement Dataset to obtain the most current quarterly revenues of U.S. based SEC registrants. To distill total revenue from reported XBRL data, we take for each filing the maximum value of the three tags
+
+\footnotesize
+
+* `"Revenues"` 
+* `"RevenueFromContractWithCustomerExcludingAssessedTax"`
+* `"RevenueFromContractWithCustomerIncludingAssessedTax"`
+
+\normalsize
+
+Produce a clean sample and report the sample size, the sample's mean and the sample's standard deviation.
+
+For extra credit: Prepare a map that shows where in the U.S. the corporate revenues are located.

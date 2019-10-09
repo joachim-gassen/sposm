@@ -1,0 +1,370 @@
+---
+title: |
+  | Statistical Programming 
+  | and Open Science Methods
+subtitle: |
+  | Functional versus object-oriented programming
+author: | 
+  | Joachim Gassen 
+  | Humboldt-Universität zu Berlin
+date:  |
+  | `r loc <- Sys.getlocale(category = "LC_TIME"); Sys.setlocale("LC_TIME", "C"); fdate <- format(Sys.time(), '%B %d, %Y'); Sys.setlocale("LC_TIME", loc); fdate`
+  
+output: 
+  beamer_presentation
+
+header-includes:
+- \usepackage{booktabs}
+- \usepackage{graphicx}
+- \usepackage{xcolor}
+- \usepackage{array}
+- \usepackage{longtable}
+- \usepackage{multirow}
+- \usepackage{wrapfig}
+- \usepackage{float}
+- \usepackage{colortbl}
+- \usepackage{pdflscape}
+- \usepackage{tabu}
+- \usepackage{threeparttable}
+- \usepackage{threeparttablex}
+- \usepackage[normalem]{ulem}
+- \usepackage{makecell}
+- \setbeamertemplate{itemize subitem}{-}
+- \titlegraphic{\includegraphics[width=6cm]{media/trr266_logo_white_background.png}}
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, table.align = "center",  message = FALSE, error = FALSE, warning = FALSE, clean = FALSE)
+library(knitr)
+library(kableExtra)
+library(tufte)
+library(ggmap)
+opts_knit$set(fig.pos = 'h')
+source("../code/utils.R")
+
+# The following allows one to use Stata in RMarkdown 
+# Nice but not open science ;-)
+# original version
+# devtools::install_github("hemken/Statamarkdown")
+# Fork that fixed Mac bug non finding the Stata executable
+# devtools::install_github("remlapmot/Statamarkdown",  ref = "macos-bug-fixes")
+# library(Statamarkdown)
+
+```
+
+## Time table October 10
+
+``` {r ttable, echo = FALSE}
+df <- sposm19_time_table %>%
+  filter(day(dtime) == day("2019-10-10")) %>%
+  mutate(dtime = format(dtime, "%H:%M"))
+
+breaks <- which(str_detect(df$title, "Lunch") | str_detect(df$title, "Coffee"))
+
+names(df) <- c("When?", "What?")
+kable(df, booktabs = TRUE, linesep = "")  %>%
+  kable_styling(latex_options = c("striped", "scale_down"),
+                stripe_index = breaks) %>%
+  row_spec(8, background = trr266_lightpetrol)
+```
+
+
+## Functional programming versus scripting
+
+* Many statistical programming languages (EViews, SAS, Stata, R to some 
+extent) are in essence scripting languages.
+* Scripts are closely connected to imperative programming ("Shut up and do what 
+I tell you!")
+* Scripts are hard to read, tend to become inefficient, and are hard to reuse
+* "If you copy + paste your (own) code a lot, you are a bad programmer"
+
+
+## The key idea of functional programming
+
+* Functional programming is declarative in nature: Your functions describe
+what to do. The implementation is hidden from the user.
+* A function takes arguments, processes them and returns results
+* A _pure function_ is a function where
+  - the result of the function depends only on its arguments and
+  - that generates no _side effects_
+* Pure functions are *referentially transparent*, meaning that they can be 
+replaced with their return value without changing the program
+* In real-life coding, many functions are not referentially transparent. This
+makes writing code easier and reading code harder 
+
+
+## Functions in R
+
+* Functions have three components: 
+  - `formals()`: The arguments that you call the function with 
+  - `body()`: The code that the function executes
+  - `environment()`: The place where the function can look for objects
+* Functions are objects, just like about anything else in R
+* Internally, they are called `closures`. Knowing this can be helpful to 
+decipher error messages!
+
+
+## Chaining functions in R: Intermediate objects
+
+Readable but tedious
+\vspace{36pt}
+\footnotesize
+```{r, eval = FALSE}
+df <- read_csv("data/sub.csv")
+df <- select(df, cik, name)
+df <- distinct(df)
+count_sec_reg <- nrow(df)
+sprintf("There are %d registrants", count_sec_reg)
+```
+\normalsize
+
+## Chaining functions in R: Nesting
+
+Concise but a pain in the eye
+\vspace{36pt}
+\footnotesize
+```{r, eval = FALSE}
+sprintf(
+  "There are %d registrants",
+  nrow(distinct(select(read_csv("data/sub.csv"), cik, name)))
+)
+```
+\normalsize
+
+## Chaining functions in R: Piping
+
+The tidy way (read `%>%` as "and then") but harder to debug
+\vspace{36pt}
+\footnotesize
+```{r, eval = FALSE}
+read_csv("data/sub.csv") %>%
+  select(cik, name) %>%
+  distinct() %>%
+  nrow() -> count_sec_reg
+
+sprintf("There are %d registrants", count_sec_reg)
+```
+\normalsize
+
+
+## Scoping I
+
+What does this code snippet return?
+\vspace{36pt}
+\footnotesize
+```{r, eval = FALSE}
+x <- 10
+
+my_func <- function() {
+  x <- 20
+  x
+}
+
+c(my_func(), x)
+```
+\normalsize
+
+
+## Scoping I
+
+What does this code snippet return?
+\vspace{36pt}
+\footnotesize
+```{r}
+x <- 10
+
+my_func <- function() {
+  x <- 20
+  x
+}
+
+c(my_func(), x)
+```
+\normalsize
+
+
+## Scoping II
+
+What does this code snippet return?
+\vspace{36pt}
+\footnotesize
+```{r, eval = FALSE}
+x <- 10
+y <- 5
+
+my_func <- function() {
+  x <- 20
+  x*y
+}
+
+my_func()
+```
+\normalsize
+
+
+## Scoping II
+
+What does this code snippet return?
+\vspace{36pt}
+\footnotesize
+```{r}
+x <- 10
+y <- 5
+
+my_func <- function() {
+  x <- 20
+  x*y
+}
+
+my_func()
+```
+\normalsize
+
+
+## Scoping III
+
+What does this code snippet return?
+```{r include = FALSE}
+rm(x, y)
+```
+\vspace{36pt}
+\footnotesize
+```{r, eval = FALSE}
+my_second_func <- function(x) {
+  y <- x
+}
+
+my_func <- function(x) {
+  x*y
+}
+
+my_second_func(5)
+my_func(10)
+```
+\normalsize
+
+
+## Scoping III
+
+What does this code snippet return?
+\vspace{36pt}
+\footnotesize
+```{r, error = TRUE}
+my_second_func <- function(x) {
+  y <- x
+}
+
+my_func <- function(x) {
+  x*y
+}
+
+my_second_func(5)
+my_func(10)
+```
+\normalsize
+
+
+## Scoping IV
+
+What does this code snippet return?
+\vspace{36pt}
+\footnotesize
+```{r, eval = FALSE}
+my_second_func <- function(x) {
+  y <<- x
+}
+
+my_func <- function(x) {
+  x*y
+}
+
+my_second_func(5)
+my_func(10)
+```
+\normalsize
+
+
+## Scoping IV
+
+What does this code snippet return?
+\vspace{36pt}
+\footnotesize
+```{r,}
+my_second_func <- function(x) {
+  y <<- x
+}
+
+my_func <- function(x) {
+  x*y
+}
+
+my_second_func(5)
+my_func(10)
+```
+\normalsize
+
+
+## For extra credit
+
+\center
+Which of these functions are pure, which are not? Why? 
+
+## Recursions: Functions can be very helpful
+
+``` {r tower-of-hanoi, echo = FALSE, fig.width = 4, fig.height = 1.5, out.width = "0.5\\textwidth"}
+ggplot() +
+  geom_leg(aes(x = 0, y = 0, xend = 10, yend = 0), size = 2.5) +
+  geom_leg(aes(x = 2, y = 0, xend = 2, yend = 0.5), size = 2.5) +
+  geom_leg(aes(x = 5, y = 0, xend = 5, yend = 0.5), size = 2.5) +
+  geom_leg(aes(x = 8, y = 0, xend = 8, yend = 0.5), size = 2.5) +
+  geom_rect(aes(xmin = 0.5, xmax = 3.5, ymin = 0.02, ymax = 0.07), 
+            color = NA, fill = trr266_petrol) +
+  geom_rect(aes(xmin = 1, xmax = 3, ymin = 0.08, ymax = 0.13), 
+            color = NA, fill = trr266_red) +
+  geom_rect(aes(xmin = 1.5, xmax = 2.5, ymin = 0.14, ymax = 0.19), 
+            color = NA, fill = trr266_yellow) + theme_void()
+```
+\vspace{12pt}
+\footnotesize
+```{r, eval = FALSE}
+tower <- function(n, from_peg, to_peg, aux_peg) {
+  if(n == 0) return(invisible())
+  tower(n - 1, from_peg, aux_peg, to_peg)
+  message(sprintf("Moving piece %d from %s to %s ...", 
+                  n, from_peg, to_peg), appendLF = FALSE)
+  tower(n - 1, aux_peg, to_peg, from_peg)
+}
+tower(3, 'F', 'T', 'A')
+```
+\normalsize
+
+
+## Recursions: Functions can be very helpful
+
+\scriptsize
+```{r, message = TRUE}
+tower <- function(n, from_peg, to_peg, aux_peg) {
+  if(n == 0) return(invisible())
+  tower(n - 1, from_peg, aux_peg, to_peg)
+  message(sprintf("Moving piece %d from %s to %s ...", 
+                  n, from_peg, to_peg))
+  tower(n - 1, aux_peg, to_peg, from_peg)
+}
+tower(3, 'F', 'T', 'A')
+```
+\normalsize
+See https://www.youtube.com/watch?v=YstLjLCGmgg for animation
+
+
+## Object oriented programming
+
+* Much more common in Python that in R, object oriented programming
+encapsulates data and functions (aka as _methods_ in the OOP world) in _classes_
+* Methods can be _overloaded_ by _inheriting_ classes
+* Tends to make code more consistent and easier to maintain/extend
+* Makes it easier for code to modify data (makes objects more _mutable_), 
+something that people in statistical programming are generally not very fond off
+* How does this look like: Let's have a quick look at a last toy example
+  - `code/show_fs_oop.py` versus
+  - `code/show_fs_fp.R`

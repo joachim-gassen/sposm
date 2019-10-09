@@ -1,0 +1,177 @@
+---
+title: |
+  | Statistical Programming 
+  | and Open Science Methods
+subtitle: |
+  | Debugging tools
+author: | 
+  | Joachim Gassen 
+  | Humboldt-Universität zu Berlin
+date:  |
+  | `r loc <- Sys.getlocale(category = "LC_TIME"); Sys.setlocale("LC_TIME", "C"); fdate <- format(Sys.time(), '%B %d, %Y'); Sys.setlocale("LC_TIME", loc); fdate`
+  
+output: 
+  beamer_presentation
+
+header-includes:
+- \usepackage{booktabs}
+- \usepackage{graphicx}
+- \usepackage{xcolor}
+- \usepackage{array}
+- \usepackage{longtable}
+- \usepackage{multirow}
+- \usepackage{wrapfig}
+- \usepackage{float}
+- \usepackage{colortbl}
+- \usepackage{pdflscape}
+- \usepackage{tabu}
+- \usepackage{threeparttable}
+- \usepackage{threeparttablex}
+- \usepackage[normalem]{ulem}
+- \usepackage{makecell}
+- \setbeamertemplate{itemize subitem}{-}
+- \titlegraphic{\includegraphics[width=6cm]{media/trr266_logo_white_background.png}}
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, table.align = "center",  message = FALSE, error = FALSE, warning = FALSE, clean = FALSE)
+library(knitr)
+library(kableExtra)
+library(tufte)
+library(ggmap)
+opts_knit$set(fig.pos = 'h')
+source("../code/utils.R")
+
+# The following allows one to use Stata in RMarkdown 
+# Nice but not open science ;-)
+# original version
+# devtools::install_github("hemken/Statamarkdown")
+# Fork that fixed Mac bug non finding the Stata executable
+# devtools::install_github("remlapmot/Statamarkdown",  ref = "macos-bug-fixes")
+# library(Statamarkdown)
+
+```
+
+## Time table October 11
+
+``` {r ttable, echo = FALSE}
+df <- sposm19_time_table %>%
+  filter(day(dtime) == day("2019-10-11")) %>%
+  mutate(dtime = format(dtime, "%H:%M"))
+
+breaks <- which(str_detect(df$title, "Lunch") | str_detect(df$title, "Coffee"))
+
+names(df) <- c("When?", "What?")
+kable(df, booktabs = TRUE, linesep = "")  %>%
+  kable_styling(latex_options = c("striped", "scale_down"),
+                stripe_index = breaks) %>%
+  row_spec(3, background = trr266_lightpetrol)
+```
+
+
+## Disclaimer
+
+\center Some of the following is borrowed from chapter 22 of 
+Hadley Wickham (2019): Advanced R,
+https://adv-r.hadley.nz
+
+
+## Principle
+
+Finding your bug is a process of confirming the many things that you believe are true — until you find one which is not true.
+
+`r quote_footer("—-- Norm Matloff")`
+
+\vspace{24pt}
+
+* Google the error message
+* Make the bug repeatable by creating a reproducible example
+* Figure out where it is
+* Fix it and test it
+
+
+## Most bugs are simple
+
+* Typos are paramount and sometimes hard to spot (a good editor with syntax 
+high-lightening helps!)
+* The best way to avoid bugs is do adopt a readable coding style
+* Debugging and unit testing go hand in hand (we will talk about unit test
+in the February block)
+* Do not ignore messages and warnings that your code throws at you. They are 
+there for a reason
+
+
+## Error messages are not always self-explanatory but almost always informative
+
+\footnotesize
+```{r, error = TRUE, collapse = TRUE}
+count_distinct_obs <- function(df, ...) {
+  as_tibble(df) %>%
+    select(...) %>%
+    distinct() %>%
+    nrow()
+}
+
+read_csv("../data/sub.csv") %>%
+  count_distinct_obs[cik, name] -> count_sec_reg
+```
+\normalsize
+
+
+## Debugging tools
+
+- Traceback
+- Debug on error
+- Breakpoints
+- Logging
+- Dump analysis
+
+
+## Corner cases
+
+\scriptsize
+```{r, collapse = TRUE}
+# This function returns a p % sample of a vector v. It always 
+# chooses at least q observations to avoid small samples
+
+sample_my_sample <- function(v, p, q) {
+  n <- ceiling(max(p * length(v), q))
+  do_replace <- (n > length(v))
+  sample(v, n, do_replace)
+}
+
+for (i in 1:10) {
+  print(sample_my_sample(i:10, 0.5, 3))
+}
+```
+\normalsize
+
+
+## Code meets data
+
+\footnotesize
+```{r, collapse = TRUE, fig.align="center", fig.height = 3, fig.width = 4, out.height = "0.5\\textwidth"}
+read_csv("../raw_data/stock_price.csv") %>% 
+  ggplot(aes(x = date, y = adj_prc)) + 
+  geom_line() + theme_minimal()
+```
+\normalsize
+
+
+## Calculate weekly mean return and weekly return variance
+
+\footnotesize
+```{r, collapse = TRUE}
+read_csv("../raw_data/stock_price.csv") %>%
+  mutate(return = (adj_prc - lag(adj_prc))/lag(adj_prc)) %>%
+  summarise(mn_return = mean(return, na.rm = TRUE),
+            var_return = sd(return, na.rm = TRUE)^2)
+
+## Correct values
+## # A tibble: 1 x 2
+##   mn_return var_return
+##       <dbl>      <dbl>
+## 1  0.000434  0.0000247
+```
+\normalsize

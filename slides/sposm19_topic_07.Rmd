@@ -1,0 +1,474 @@
+---
+title: |
+  | Statistical Programming 
+  | and Open Science Methods
+subtitle: |
+  | Relational databases and the concept of normalized data
+author: | 
+  | Joachim Gassen 
+  | Humboldt-Universität zu Berlin
+date:  |
+  | `r loc <- Sys.getlocale(category = "LC_TIME"); Sys.setlocale("LC_TIME", "C"); fdate <- format(Sys.time(), '%B %d, %Y'); Sys.setlocale("LC_TIME", loc); fdate`
+  
+output: 
+  beamer_presentation
+
+header-includes:
+- \usepackage{booktabs}
+- \usepackage{graphicx}
+- \usepackage{xcolor}
+- \usepackage{array}
+- \usepackage{longtable}
+- \usepackage{multirow}
+- \usepackage{wrapfig}
+- \usepackage{float}
+- \usepackage{colortbl}
+- \usepackage{pdflscape}
+- \usepackage{tabu}
+- \usepackage{threeparttable}
+- \usepackage{threeparttablex}
+- \usepackage[normalem]{ulem}
+- \usepackage{makecell}
+- \setbeamertemplate{itemize subitem}{-}
+- \titlegraphic{\includegraphics[width=6cm]{media/trr266_logo_white_background.png}}
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, table.align = "center",  message = FALSE, error = FALSE, warning = FALSE, clean = FALSE)
+library(knitr)
+library(kableExtra)
+library(tufte)
+#devtools::install_github("bergant/datamodelr")
+library(datamodelr)
+opts_knit$set(fig.pos = 'h')
+source("../code/utils.R")
+
+# The following allows one to use Stata in RMarkdown 
+# Nice but not open science ;-)
+# original version
+# devtools::install_github("hemken/Statamarkdown")
+# Fork that fixed Mac bug non finding the Stata executable
+# devtools::install_github("remlapmot/Statamarkdown",  ref = "macos-bug-fixes")
+# library(Statamarkdown)
+
+```
+
+## Time table October 11
+
+``` {r ttable, echo = FALSE}
+df <- sposm19_time_table %>%
+  filter(day(dtime) == day("2019-10-11")) %>%
+  mutate(dtime = format(dtime, "%H:%M"))
+
+breaks <- which(str_detect(df$title, "Lunch") | str_detect(df$title, "Coffee"))
+
+names(df) <- c("When?", "What?")
+kable(df, booktabs = TRUE, linesep = "")  %>%
+  kable_styling(latex_options = c("striped", "scale_down"),
+                stripe_index = breaks) %>%
+  row_spec(5, background = trr266_lightpetrol)
+```
+
+
+## Disclaimer
+
+\center Some of the following --- in particular the nice-looking figures ---
+are borrowed from Garrett Grolemund and Hadley Wickham (2017):
+R for Data Science, https://r4ds.had.co.nz
+
+
+## Think about the following scenarios
+
+- You have a project that collects data via a web form/survey
+- You have a time-intensive process that you want to multi-thread across several
+platforms
+- You have big data that you need to query but the amount of data that you
+actually need for your analysis is relatively small
+- You are reusing data for multiple projects
+
+\vspace{12pt}
+
+In all these cases you might need a relational database management 
+system (RDBMS)
+
+
+## Our SEC data has a relational structure \dots
+
+```{r sec-datamodel, cache = TRUE, echo = FALSE, fig.align="center", out.height="0.8\\textheight"}
+for(df_name in c("sub", "tag", "num", "pre")) {
+  assign(df_name, read_csv(paste0("../data/", df_name, ".csv")))
+}
+sub <- sub %>% select(adsh, cik, name, sic, countryba, form, period, fp)
+sec_dm <- dm_from_data_frames(sub, tag, num , pre)
+
+sec_dm <- dm_add_references(
+  sec_dm,
+  num$adsh == sub$adsh,
+  num$tag == tag$tag,
+  num$version == tag$version,
+  pre$adsh == sub$adsh,
+  pre$tag == tag$tag,
+  pre$version == tag$version,
+  pre$adsh == num$adsh,
+  pre$tag == num$tag,
+  pre$version == num$version
+)
+graph <- dm_create_graph(sec_dm, rankdir = "LR", col_attr = c("column", "type"))
+dm_render_graph(graph)
+```
+
+
+## Understanding the concept of relations: Fundamentals
+
+* Observations are stored in rows, variables are stored in columns
+
+* Only one observation per row, only one variable per column
+
+* Each observation has a unique primary key (might be a set of keys)
+
+
+\begin{center}
+\includegraphics[width=\textwidth]{media/r4ds_fig_12-1.png} 
+\end{center}
+
+
+
+## Primary and foreign keys
+
+* A primary key (or set of keys) identifies an observation in a given dataset/table
+
+* A foreign key (or a set of keys) identifies an observation in _another_ dataset/table
+
+* This implies that a foreign key is not necessary unique (while the primary key is)
+
+* In is a very useful habit to organize joins so that you use the foreign key of the first (left) and the primary key of the second (right) dataset
+
+
+## Joining datasets: 1:1 joins
+
+* There are various type of joins: The inner join
+
+\vspace{36pt}
+
+\begin{center}
+\includegraphics[width=0.5\textwidth]{media/r4ds_join-inner.png} 
+\end{center}
+
+
+## Joining datasets: 1:1 joins
+
+* The outer joins
+
+\begin{center}
+\includegraphics[width=0.4\textwidth]{media/r4ds_join-outer.png} 
+\end{center}
+
+
+## Joining datasets: 1:1 joins
+
+* The 1:1 joins combined
+ 
+\vspace{36pt}
+ 
+\begin{center}
+\includegraphics[width=\textwidth]{media/r4ds_join-venn.png} 
+\end{center}
+
+
+## Joining datasets: 1:n joins
+
+* Joins one observation from one dataset to potentially many observations from another dataset. Can and in most cases will enlarge the sample size
+
+\vspace{36pt}
+ 
+\begin{center}
+\includegraphics[width=0.5\textwidth]{media/r4ds_join-one-to-many.png} 
+\end{center}
+
+
+## Joining datasets: n:m joins (the wrong way)
+
+* Directly joining two datasets that form a n:m relation is not feasible as observations are no longer uniquely defined in _both_ tables.
+
+\vspace{36pt}
+ 
+\begin{center}
+\includegraphics[width=0.5\textwidth]{media/r4ds_join-many-to-many.png} 
+\end{center}
+
+
+## Joining done right: A "case study" about normalization
+
+Assume that we run an event for the TRR 266. People register for the
+event. To keep track of registration, we set up the following data
+set.
+
+\vspace{24pt}
+
+\footnotesize
+```{r}
+participant = tibble(
+  name = c("Andreas", "Tina", "Xhi"),
+  email = c("andi@gmail.com", "tina@hu-berlin.de", "xhi@upb.de"),
+  project = c("A02", "B02", "A05, B08")
+)
+```
+\normalsize
+
+What do you think about this approach?
+
+
+## Oh, OK. You want a key
+
+All good now?
+
+\vspace{24pt}
+
+\footnotesize
+```{r}
+participant <- tibble(
+  participant_id = 1:3,
+  name = c("Andreas", "Tina", "Xhi"),
+  email = c("andi@gmail.com", "tina@hu-berlin.de", "xhi@upb.de"),
+  project = c("A02", "B02", "A05, B08")
+)
+```
+\normalsize
+
+
+## `project` is not atomic
+
+`participants$project[3] ("A05, B08")` contains two observations. How to fix this? Maybe by:
+
+\vspace{24pt}
+
+\footnotesize
+```{r}
+participant <- tibble(
+  participant_id = 1:3,
+  name = c("Andreas", "Tina", "Xhi"),
+  email = c("andi@gmail.com", "tina@hu-berlin.de", "xhi@upb.de"),
+  project1 = c("A02", "B02", "A05"),
+  project2 = c(NA, NA, "B08")
+)
+```
+\normalsize
+
+Now everything is atomic (One value per cell). Technically, we have reached the first normal form of a relational database. Is it a smart solution?
+
+
+## Addressing insertion anomalies
+
+No. We created an _insertion anomaly_. If somebody happens to be on 
+three projects, we would be unable to enter this information in our
+data model. Let's address this.
+
+\vspace{12pt}
+
+\footnotesize
+```{r}
+participant <- tibble(
+  participant_id = 1:3,
+  name = c("Andi", "Tina", "Xhi"),
+  email = c("andi@gmail.com", "tina@hu-berlin.de", "xhi@upb.de")
+)
+
+people_project <- tibble(
+  participant_id = c(1, 2, 3, 3),
+  project_id = c("A02", "B02", "A05", "B08")
+)
+```
+\normalsize
+
+## Adding data
+
+We are happy about our new data model but we do not know what these
+fancy project IDs stand for. Why not add project names?
+\vspace{12pt}
+
+\footnotesize
+```{r}
+people_project$project_title <- c(
+  "Transparency Effects of Organizational Innovations",
+  "Private Firm Transparency",
+  "Accounting for Tax Complexity",
+  "Tax Burden Transparency"
+) 
+```
+\normalsize
+
+We are happy. Right?
+
+
+## Meet the second normal form (2NF)
+
+We just introduced data into your model that only depends on `project_id`, not on `participant_id`. As both together define the key of the dataset ``people_in_projects`, we violated the requirements of second form normality: All non key data in a table have to depend on _all_ keys, not on a subset.
+
+This is important as a violation creates an _update anomaly_. 
+In our case: When we change a project title, we potentially 
+need to change in it multiple instances in your data.
+
+Let's fix this.
+
+\footnotesize
+```{r}
+project <- tibble(
+  project_id = people_project$project_id,
+  project_title = people_project$project_title
+)
+
+people_project <- people_project %>%
+  select(- project_title)
+```
+\normalsize
+
+
+## Deleting data \dots
+
+We are very proud of ourselves. Now Tina calls. She can't make it to
+our event. No problem. We simply delete her entry and send her an email
+to acknowledge that she is no longer registered. 
+
+\vspace{24pt}
+
+\footnotesize
+```{r}
+participant <- participant %>%
+  filter(participant_id != 2)
+```
+\normalsize
+
+But, hey, where did her email go? 
+
+
+## The third normal form
+
+Our `participant` table is subject to a _deletion anomaly_ as it is not
+in the third normal form (3NF). When we delete data, we also delete
+data that is still informative (the email in our case).
+
+The third normal form requires on top of the second normal form that
+there are no _transitional dependencies_ in our data, meaning that all
+the non-keys are directly depending on the keys and not on some other 
+variable that in turn depends on the keys.
+
+## Time for a last change
+
+\footnotesize
+```{r}
+people <- tibble(
+  people_id = 1:3,
+  name = c("Andi", "Tina", "Xhi"),
+  email = c("andi@gmail.com", "tina@hu-berlin.de", "xhi@upb.de")    
+)
+
+people_event <- tibble(
+  event_id = c(1, 1),
+  people_id = c(1, 3)
+)
+
+event <- tibble(
+  event_id = 1,
+  name = "Our super nice event"
+)
+
+people_project <- people_project %>%
+  rename(people_id = participant_id)
+
+rm(participant)
+```
+\normalsize
+
+
+## Our data model and voila: two n:m relations
+
+```{r {case-dm}, echo = FALSE, fig.height = 3, fig.width = 4, fig.align = "center", out.width="0.6\\textwidth", cache = TRUE}
+my_dm <- dm_from_data_frames(
+  people_project, project, people, people_event, event
+)
+my_dm <- dm_auto_create_keys_and_references(my_dm)
+graph <- dm_create_graph(my_dm, rankdir = "TB")
+dm_render_graph(graph)
+```
+
+
+## Using external RDBMS for storage
+
+* Using database solutions external to your own programming code has many advantages
+* Your can access your data from various platforms
+* RDMBS take care of potential race conditions when concurrent access is feasible
+* Data integrity is maintained across applications
+* Query speed (at least in many cases)
+
+
+## A simple example: SQLite
+
+* `SQLite` is a light-weight single-user file-based RDBMS
+* It qualifies as ACID: Transactions are _atomic_, _consistent_, _isolated_, and _durable_. 
+* Using such a RDBMS does not avoid all race conditions (concurrent data changes leaving data in inconsistent state) but significantly reduces the situations where race conditions can incur
+
+\vspace{12pt}
+
+Larger scale RDBMS that can be outsourced to different servers include
+_PostgreSQL_, _MySQL_, and _MariaDB_
+
+## Moving our SEC data to SQLite
+
+\footnotesize
+```{r, cache = TRUE, message = FALSE, collapse = TRUE}
+library(DBI)
+if (file.exists("../data/sec.sqlite3")) 
+  unlink("../data/sec.sqlite3")
+con <- dbConnect(RSQLite::SQLite(), "../data/sec.sqlite3")
+for(df_name in c("sub", "tag", "num", "pre")) {
+  dbWriteTable(
+    con, df_name, 
+    read_csv(paste0("../data/", df_name, ".csv"))
+  )
+}
+dbListTables(con)
+dbDisconnect(con)
+```
+\normalsize
+
+
+## It pays performance-wise (100 runs each)
+
+```{r, eval = FALSE, echo = FALSE}
+# This code is non-portable as I hard-coded the links to Python and Stata.
+# Sorry for being lazy. And as it runs several hours (thank you, Stata),
+# I stored the data permanently.
+
+library(microbenchmark)
+
+mbm_100 <- microbenchmark(
+  r_flat_file = source("code/extract_revenues_sec_fin_stat_data.R"),
+  python_flat_file = system("/Users/joachim/anaconda3/bin/python3 code/extract_revenues_sec_fin_stat_data.py"),
+  stata_flat_file = system("/Applications/Stata/StataSE.app/Contents/MacOS/StataSE -e code/extract_revenues_sec_fin_stat_data.do"),
+  r_sqlite = source("code/extract_revenues_sec_fin_stat_data_db.R"),
+  times = 100
+)
+saveRDS(mbm_100, "raw_data/microbenchmark_extract_revenues_sec_fsd.RDS")
+
+```
+
+```{r, echo = FALSE, fig.width=4, fig.height=3, out.width="0.9\\textwidth"}
+mbm_100 <- readRDS("../raw_data/microbenchmark_extract_revenues_sec_fsd.RDS") %>%
+  mutate(seconds = time/1e9) 
+
+levels(mbm_100$expr) <- c("R\n(CSV data)", "Python 3\n(CSV data)", 
+                          "Stata\n(CSV Data)", "R\n(SQLite)") 
+
+ggplot(data = mbm_100 %>% filter(expr != "Stata\n(CSV Data)"), 
+       aes(x = expr, y = seconds, color = expr)) +
+  geom_boxplot(outlier.shape = NA, fill = NA) +
+  geom_point(aes(fill = expr), alpha = 0.5, size = 1,
+             position=position_jitter(width = 0.2)) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  labs(x = "Approach", y = "Execution time in seconds")
+```
+
+Note: Runs for Stata (CSV data) executed from plot (mean = 
+`r format(mean(mbm_100$seconds[mbm_100$expr == "Stata\n(CSV Data)"]), digits = 0)`)
