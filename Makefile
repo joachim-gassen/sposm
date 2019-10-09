@@ -13,7 +13,7 @@ clean: clean_slides_dir
 	rm -f data/*
 	rm -f code/intro_survey/sposm_survey.sqlite3
 
-data: data/sub.csv data/num.csv data/pre.csv tag.csv
+data: data/sub.csv data/num.csv data/pre.csv data/tag.csv
 
 slides: data ${SLIDES_PDF} clean_slides_dir
 
@@ -27,4 +27,4 @@ slides: data ${SLIDES_PDF} clean_slides_dir
 data/sub.csv: code/read_sec_fin_stat_data.R
 	Rscript code/read_sec_fin_stat_data.R
 
-data/num.csv data/pre.csv tag.csv: data/sub.csv
+data/num.csv data/pre.csv data/tag.csv: data/sub.csv
