@@ -54,7 +54,7 @@ RUN tlmgr install multirow xcolor colortbl wrapfig float tabu varwidth \
 RUN  R -e "install.packages(c('kableExtra', 'ExPanDaR', 'ggmap', 'tidyr', \
   'tufte', 'showtext', 'cowplot', 'DiagrammeR', 'leaflet', 'widgetframe', \
   'zipcode', 'shiny', 'shinyjs', 'grid', 'gridExtra', 'ggwordcloud', 'tm', \
-  'qrcode', repos = c(CRAN = 'https://mran.microsoft.com/snapshot/2019-09-25'))"
+  'qrcode'), repos = c(CRAN = 'https://mran.microsoft.com/snapshot/2019-09-25'))"
 
 # Replacement repo as MRAN was flaky over the last days
 # c(CRAN = 'https://cran.uni-muenster.de/')
@@ -67,3 +67,9 @@ RUN R -e "webshot::install_phantomjs()"
 RUN mv /root/bin/phantomjs /usr/local/bin
 
 RUN chown -R rstudio:staff /opt/TinyTeX
+
+# The below invalidates the cache whenever the Head of the Github repo changes
+ADD https://api.github.com/repos/joachim-gassen/sposm/git/refs/heads/master version.json  
+
+RUN cd /home/rstudio \
+  && sudo -H -u rstudio git clone https://github.com/joachim-gassen/sposm.git

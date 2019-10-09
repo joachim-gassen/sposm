@@ -1,4 +1,4 @@
-TARGETS := data slides docs/link_list.html code/intro_survey/sposm_survey.sqlite3
+TARGETS := data slides docs/link_list.html
 SLIDES_PDF := $(patsubst %.Rmd, %.pdf, $(wildcard slides/*.Rmd))
 
 .phony: slides data all clean clean_slides_dir
@@ -17,9 +17,6 @@ data: data/sub.csv data/num.csv data/pre.csv tag.csv
 
 slides: data ${SLIDES_PDF} clean_slides_dir
 
-code/intro_survey/sposm_survey.sqlite3: code/intro_survey/init_sqlite_db.R
-	Rscript code/intro_survey/init_sqlite_db.R
-	
 %.pdf: %.Rmd code/utils.R
 	Rscript -e "rmarkdown::render('$*.Rmd')"
 	rm $*.tex
