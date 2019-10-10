@@ -12,7 +12,7 @@ library(widgetframe)
 # devtools::install_github("wmurphyrd/fiftystater")
 library(fiftystater)
 data(zipcode)
-
+data(fifty_states)
 
 #--- Prepare data --------------------------------------------------------------
 

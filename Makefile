@@ -13,7 +13,7 @@ clean: clean_slides_dir
 	rm -f data/*
 	rm -f code/intro_survey/sposm_survey.sqlite3
 
-data: data/sub.csv data/num.csv data/pre.csv data/tag.csv
+data: data/sub.csv data/num.csv data/pre.csv data/tag.csv data/sposm_survey.sqlite3
 
 slides: data ${SLIDES_PDF} clean_slides_dir
 
@@ -24,6 +24,9 @@ slides: data ${SLIDES_PDF} clean_slides_dir
 %.html: %.Rmd
 	Rscript -e "rmarkdown::render('$*.Rmd')"
 
+data/sposm_survey.sqlite3: code/intro_survey/init_sqlite_db.R
+	Rscript code/intro_survey/init_sqlite_db.R
+	
 data/sub.csv: code/read_sec_fin_stat_data.R
 	Rscript code/read_sec_fin_stat_data.R
 
