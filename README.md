@@ -68,7 +68,9 @@ the code relies on. Run the following in the R console (lower left corner).
 
 ```
 install.packages(c('tidyverse', 'devtools', 'rmarkdown', 'kableExtra',
-'ExPanDaR', 'ggmap', 'tidyr', 'tufte', 'showtext', 'cowplot', 'DiagrammeR',   'leaflet', 'widgetframe', 'zipcode', 'shiny', 'shinyjs', 'grid', 'gridExtra', 'ggwordcloud', 'tm', 'qrcode'), 
+'ExPanDaR', 'ggmap', 'tidyr', 'tufte', 'showtext', 'cowplot', 'DiagrammeR',
+'leaflet', 'widgetframe', 'zipcode', 'shiny', 'shinyjs', 'grid', 'gridExtra',
+'ggwordcloud', 'tm', 'qrcode'), 
 repos = c(CRAN = 'https://mran.microsoft.com/snapshot/2019-09-25'))
 
 devtools::install_github('bergant/datamodelr')
