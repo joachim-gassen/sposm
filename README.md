@@ -48,3 +48,15 @@ Do not commit anything to these directories.
 <p align="center">
 <img src="resources/programming_meme.jpg" alt="A meme!" width="40%"/>
 </p>
+
+### 2019-10-10: Issue report
+
+If you are having issues knitting the slides and are running R 3.6.0 or later, this may be because the compatible version of datamodelr is not yet available on the CRAN. To install datamodelr from GitHub, run:
+1) install.packages("devtools") [NOTE: you may have devtools already installed]
+2) devtools::install_github("bergant/datamodelr")
+
+### 2019-10-10: Pull from Joachim Gassen's master
+Once you have forked your repo from Joachim Gassen's master repo, you will need to pull updates from his master repo.
+
+To pull from your master repo, use: git pull origin master.
+To pull from Joachim Gassen's master repo, I found these instructions to be helpful: https://gist.github.com/CristinaSolana/1885435
