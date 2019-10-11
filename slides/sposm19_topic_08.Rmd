@@ -145,7 +145,7 @@ Definition: `r worldbank_data_def$var_def[23]`
 
 \normalsize
 
-## The resulting defoliator problem
+## The resulting deflator problem
 
 ```{r, echo = FALSE, cache = TRUE, fig.width=4, fig.height=3, out.width="0.9\\textwidth", warning=FALSE}
 ggplot(data = wb, aes(x = log(gdp), y = imports_gdp)) +

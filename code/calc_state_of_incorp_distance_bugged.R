@@ -33,6 +33,7 @@ state_loc <- us_area_code_city_loc %>%
 df %>%
   filter(countryinc == "US") %>%
   filter(countryba == "US") %>%
+  filter(!is.na(stprinc)) %>%
   rename(state_inc = stprinc) %>%
   mutate(zip = clean.zipcodes(zipba)) %>%
   select(cik, name, sic, zip, state_inc) %>%
@@ -49,8 +50,9 @@ df %>%
     long_ba = longitude
   ) %>%
   select(cik, name, sic, ends_with("_inc"), ends_with("_ba"))  %>%
-  mutate(dist_inc_ba = distm(c(long_inc, lat_inc), 
-                             c(long_ba, lat_ba))/1000) %>%
+  filter(!is.na(long_ba)) %>%
+  mutate(dist_inc_ba = distGeo(cbind(long_inc, lat_inc), 
+                             cbind(long_ba, lat_ba))/1000) %>%
   group_by(state_inc) %>%
   summarise(
     nobs = n(),

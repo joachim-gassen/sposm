@@ -1,0 +1,141 @@
+---
+title: |
+  | Statistical Programming 
+  | and Open Science Methods
+subtitle: |
+  | Assignments and wrap-up 
+author: | 
+  | Joachim Gassen 
+  | Humboldt-Universität zu Berlin
+date:  |
+  | `r loc <- Sys.getlocale(category = "LC_TIME"); Sys.setlocale("LC_TIME", "C"); fdate <- format(Sys.time(), '%B %d, %Y'); Sys.setlocale("LC_TIME", loc); fdate`
+  
+output: 
+  beamer_presentation
+
+header-includes:
+- \usepackage{booktabs}
+- \usepackage{graphicx}
+- \usepackage{xcolor}
+- \usepackage{array}
+- \usepackage{longtable}
+- \usepackage{multirow}
+- \usepackage{wrapfig}
+- \usepackage{float}
+- \usepackage{colortbl}
+- \usepackage{pdflscape}
+- \usepackage{tabu}
+- \usepackage{threeparttable}
+- \usepackage{threeparttablex}
+- \usepackage[normalem]{ulem}
+- \usepackage{makecell}
+- \setbeamertemplate{itemize subitem}{-}
+- \titlegraphic{\includegraphics[width=6cm]{media/trr266_logo_white_background.png}}
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, table.align = "center",  message = FALSE, error = FALSE, warning = FALSE, clean = FALSE)
+library(knitr)
+library(kableExtra)
+library(tufte)
+
+opts_knit$set(fig.pos = 'h')
+source("../code/utils.R")
+
+# The following allows one to use Stata in RMarkdown 
+# Nice but not open science ;-)
+# original version
+# devtools::install_github("hemken/Statamarkdown")
+# Fork that fixed Mac bug non finding the Stata executable
+# devtools::install_github("remlapmot/Statamarkdown",  ref = "macos-bug-fixes")
+# library(Statamarkdown)
+
+```
+
+
+## Time table October 11
+
+``` {r ttable, echo = FALSE}
+df <- sposm19_time_table %>%
+  filter(day(dtime) == day("2019-10-11")) %>%
+  mutate(dtime = format(dtime, "%H:%M"))
+
+breaks <- which(str_detect(df$title, "Lunch") | str_detect(df$title, "Coffee"))
+
+names(df) <- c("When?", "What?")
+kable(df, booktabs = TRUE, linesep = "")  %>%
+  kable_styling(latex_options = c("striped", "scale_down"),
+                stripe_index = breaks) %>%
+  row_spec(7, background = trr266_lightpetrol)
+```
+
+
+## Assignments
+
+- If you want to receive credits (6 ECTS) for this course you need to
+  hand in three individual and one group assignment on time.
+  
+- Individual assignment: Coding sprints (three week period, scattered throughout 
+  the term, 5 in total)
+  
+- Group projects: One larger real-life task. The project needs to generate an
+  asset for the open science community.
+  
+- Groups should consist of not more than five people. Please try to
+  self-coordinate groups based on skills and domain interest. Let me know when 
+  you need help. Groups should be formed by the end of next week, preferably 
+  today.
+
+- While the coding sprints will be determined and introduced by me, the group
+  assignments will be negotiated with each group. I have some ideas but am 
+  open for suggestions.
+
+  
+
+## Your first sprint assignment
+
+\footnotesize
+
+- Provide code that produces a GIF documenting something interesting based on 
+  Wordlbank data. Communicating the increasing income gap between Africa and the 
+  rest of the world is an option but you can also choose a different topic.
+
+- An example:
+  https://twitter.com/DLeonhardt/status/1181004566088814594
+
+- Data: `worldbank` dataset from `ExPanDaR` package or 
+  https://data.worldbank.org
+  
+- Your solution has to contain code and documentation so that it can
+  be reproduced in our development environment. Data should _not_ be included
+  but the code should pull it from publicly available resources.
+  
+- Deadline for submission: Monday, Oct 28, 9am. Please only commit locally prior
+  to the deadline (maybe in a separate branch?) and submit by email.
+
+- After the deadline, feel free to push your code to your remote
+  fork for everybody to enjoy.
+  
+\normalsize
+
+## Our next physical meeting: Feb 17/18, 2020
+
+Coming up: Even more exciting topics
+
+- Group presentations of their work
+- Testing
+- Profiling
+- Data scraping
+- Interactive visualization
+- Simulations and effect size analysis
+- Explore your researcher degrees of freedom
+- Providing data access via RDBMS and APIs
+
+\vspace{12pt}
+\center
+
+Mark your calendars and make sure that you receive GitHub notifications by "watching" the `sposm` repository!
+
+# Thank you very much!
+
