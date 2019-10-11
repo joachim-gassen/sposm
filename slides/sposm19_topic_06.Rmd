@@ -96,10 +96,10 @@ Finding your bug is a process of confirming the many things that you believe are
 * Typos are paramount and sometimes hard to spot (a good editor with syntax 
 high-lightening helps!)
 * The best way to avoid bugs is do adopt a readable coding style
-* Debugging and unit testing go hand in hand (we will talk about unit test
+* Debugging and unit testing go hand in hand (we will talk about unit testing
 in the February block)
 * Do not ignore messages and warnings that your code throws at you. They are 
-there for a reason
+there for a reason,
 
 
 ## Error messages are not always self-explanatory but almost always informative
@@ -127,6 +127,10 @@ read_csv("../data/sub.csv") %>%
 - Logging
 - Dump analysis
 
+\vspace{12pt}
+\center
+
+Let's do a case: Take a look at `code/calc_state_of_incorp_distance_bugged.R`
 
 ## Corner cases
 

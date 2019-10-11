@@ -77,6 +77,7 @@ devtools::install_github('bergant/datamodelr')
 devtools::install_github('wmurphyrd/fiftystater')
 webshot::install_phantomjs()
 ```
+
 Test whether you can run all code. In the Terminal (lower left corner) run:
 
 ```
@@ -135,7 +136,7 @@ git remote -v
 
 To keep your fork in sync with the main repository, you need to follow the
 strategy explained here: https://help.github.com/en/articles/syncing-a-fork.
-Additional helpful can be found here: https://gist.github.com/CristinaSolana/1885435. 
+Additional helpful info can be found here: https://gist.github.com/CristinaSolana/1885435. 
 
 
 ### Tips and Tricks
