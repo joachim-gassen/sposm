@@ -15,6 +15,14 @@
 
 # http://localhost:8787
 
+# If you use docker toolbox, your need to use your
+# actual IP instead of localhost. Your IP is displayed 
+# in the top of the docker toolbox window. So you will issue
+# something like
+
+# http://192.168.245.254:8787
+
+
 # When you are done, you can stop the container instance
 
 # docker stop sposm
