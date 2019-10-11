@@ -51,10 +51,10 @@ Windows in brackets)
 - git: https://gitforwindows.org
 - R > 3.5.0: https://cloud.r-project.org
 - Free version of Rstudio: https://rstudio.com/products/rstudio/download/ 
-- RTools (including make, I hope): https://cran.r-project.org/bin/windows/Rtools/
+- RTools (including make): https://cran.r-project.org/bin/windows/Rtools/
   Make sure that you include the Rtools directory in your path (you are asked
-  about this during the installation. *NOTE: If you happen other GNU tools
-  installed already (Cygwin or MinGW), please do not install RTools.* Instead,
+  about this during the installation). **NOTE: If you happen other GNU tools
+  installed already (Cygwin or MinGW), please do not install RTools.** Instead,
   verify that make is available and included in your path.
 - Python3: https://www.python.org/downloads/
 
@@ -89,11 +89,11 @@ Continue with "Produce all Output" below.
 ### Setting up the environment: The docker way
 
 First you need install docker. When you have
-new version of MacOS or Windows 10 Professional/Enterprise installed: https://docs.docker.com/get-started/. *Read the introductions
-for your operating system.* They are important.
+new version of MacOS or Windows 10 Professional/Enterprise installed: https://docs.docker.com/get-started/. **Read the introductions
+for your operating system.** They are important.
 
-If you happen to have an older/less expensive version of Windows then docker toolbox is your choice: https://docs.docker.com/toolbox/. *Read the introductions
-for your operating system* They are important.
+If you happen to have an older/less expensive version of Windows then docker toolbox is your choice: https://docs.docker.com/toolbox/. 
+**Read the introductions for your operating system.** They are important.
 
 After installing docker, verify that it is running by opening a shell/terminal
 and issuing the command `docker` (in the black toolbox window if you run docker
@@ -141,9 +141,11 @@ Additional helpful can be found here: https://gist.github.com/CristinaSolana/188
 ### Tips and Tricks
 
 If you are having issues knitting the slides this might be because  `datamodelr` is not yet available on the CRAN. To install datamodelr from GitHub, run:
-1) install.packages("devtools") [NOTE: you may have devtools already installed]
-2) devtools::install_github("bergant/datamodelr")
 
+```
+install.packages("devtools") # NOTE: you may have devtools already installed
+devtools::install_github("bergant/datamodelr")
+```
 
 ### Disclaimer
 
