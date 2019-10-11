@@ -148,6 +148,11 @@ install.packages("devtools") # NOTE: you may have devtools already installed
 devtools::install_github("bergant/datamodelr")
 ```
 
+When you use docker toolbox the docker container is not hosted on localhost but
+instead on a dedicated virtual machine that has a unique IP address. See the
+Dockerfile for more detail.
+
+
 ### Disclaimer
 
 <p align="center">

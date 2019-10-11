@@ -3,6 +3,8 @@
 
 # docker build -t sposm_ide .
 
+# (do not forget the dot!)
+
 # After the docker image has been built you can run it by
 
 # docker run -d -p 8787:8787 -e PASSWORD=??? --name sposm sposm_ide
@@ -15,12 +17,22 @@
 
 # http://localhost:8787
 
-# If you use docker toolbox, your need to use your
-# actual IP instead of localhost. Your IP is displayed 
-# in the top of the docker toolbox window. So you will issue
-# something like
+# If you use docker toolbox, your need to use the IP address of a virtual 
+# machine created by docker toolbox instead of localhost. The IP address is 
+# displayed in the top of the docker toolbox window with the text
 
-# http://192.168.245.254:8787
+# "docker is configured to use the default machine with IP ...."
+
+# If you do not find it there you can also retrieve it by issuing the following
+# command within docker toolbox
+
+# docker-machine ip default
+
+# Access your new integrated development environment in your browser replacing
+# XXX.WWW.YYY:ZZZ with your IP adress, the user 'rstudio' and your password from 
+# above:
+
+# http://XXX.WWW.YYY.ZZZ:8787
 
 
 # When you are done, you can stop the container instance
@@ -34,6 +46,7 @@
 # If you also want to delete the image that was created from the Dockerfile
 
 # docker image rm sposm_ide
+
 
 # Below you will find the actual Dockerfile
 
