@@ -130,7 +130,7 @@ make all
 To add the main repository as an additional repository with the name `upstream`, open the terminal (lower left corner) and add the remote.
 
 ```
-git remote add upstream https://github.com/joachim.gassen/sposm.git
+git remote add upstream https://github.com/joachim-gassen/sposm.git
 git remote -v
 ```
 
