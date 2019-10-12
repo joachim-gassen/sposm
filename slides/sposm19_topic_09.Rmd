@@ -98,7 +98,7 @@ kable(df, booktabs = TRUE, linesep = "")  %>%
 \footnotesize
 
 - Provide code that produces a GIF documenting something interesting based on 
-  Wordlbank data. Communicating the increasing income gap between Africa and the 
+  World Bank data. Communicating the increasing income gap between Africa and the 
   rest of the world is an option but you can also choose a different topic.
 
 - An example:

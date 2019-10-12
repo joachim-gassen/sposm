@@ -43,7 +43,7 @@ be useful for self-study. To do so:
 - Work through the slides for Topics 1 to 9. Doing so, it is also useful to take
   a look at the source code of the slides if you are familiar with R.
 - Work with the literature that is provided in the 
-  [link list](data/link_list.html) and on the slides.
+  [link list](/blob/master/data/link_list.html) and on the slides.
 - Try your luck with the individual assignments. They will be announced as GitHub
   issues throughout the period October 2019 to January 2020.
 - Pick a small project that you expect to contribute to the Open Science
