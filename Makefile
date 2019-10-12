@@ -1,4 +1,4 @@
-TARGETS := data slides docs/link_list.html
+TARGETS := data slides 
 SLIDES_PDF := $(patsubst %.Rmd, %.pdf, $(wildcard slides/*.Rmd))
 
 .phony: slides data all clean clean_slides_dir

@@ -1,10 +1,3 @@
----
-title: "Link list"
-author: "Joachim Gassen"
-date: "8/26/2019"
-output: html_document
----
-
 ### Disclaimer
 
 This list is meant to be growing on your input. If you come across something
