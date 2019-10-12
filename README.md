@@ -4,19 +4,72 @@
 
 This is the repository to a brand-new and in-development statistical 
 programming and open science course. It is being developed by me (Joachim 
-Gassen) and is being offered under the research program of the [TRR 266 "Accounting for Transparency"](https://www.accounting-for-transparency.de).
+Gassen) and is being offered under the research program of the 
+[TRR 266 "Accounting for Transparency"](https://www.accounting-for-transparency.de).
 
-It communicates how to develop data science applications that comply to the FAIR principles of open science. That means that they are findable, accessible, interoperable and reusable. After this course, participants should 
-be able to conduct data-based research projects that enable others to contribute
-and collaborate. This implies that they will
+It communicates how to conduct data-based research so that others can contribute
+and collaborate. This involves making your research data and methods FAIR 
+(findable, accessible, interoperable and reusable) and your results reproducible. 
+
+After this course, participants will
 
 -	be able to use common collaboration tools in software development like 
-Git and Github,
--	understand how to use functional and object-oriented programming approaches to develop accessible code,
+  Git and Github,
+- know how to set up a portable and time-independent development environment
+  in a docker container,
+-	understand how to use functional and object-oriented programming approaches 
+  to develop accessible code,
 -	be capable to develop test routines and debug code,
 -	have gained an understanding on how to profile code,
--	have developed routines for standard data analysis tasks, like data scraping, cleaning and visualization, and
--	have understood how to package statistical applications so that they are portable across platforms.
+-	have developed routines for standard data analysis tasks, like data scraping, 
+  cleaning and visualization, 
+-	have understood how to package statistical applications so that they are 
+  portable across platforms, and
+- be able to provide FAIR data and methods as well as replication kits to the
+  scientific community.
+
+
+### Course format
+
+The course consists of two block sessions covering two days each and online 
+assignments and group work in between. Students are free to prepare their 
+assignments using a statistical programming language of their choice.
+
+While the course is designed as a blended learning event, it might also
+be useful for self-study. To do so:
+
+- Set up the development environment as described below.
+- Produce data, slides and additional info by running `make all`.
+- Work through the slides for Topics 1 to 9. Doing so, it is also useful to take
+  a look at the source code of the slides if you are familiar with R.
+- Work with the literature that is provided in the 
+  [link list](data/link_list.html) and on the slides.
+- Try your luck with the individual assignments. They will be announced as GitHub
+  issues throughout the period October 2019 to January 2020.
+- Pick a small project that you expect to contribute to the Open Science
+  community. This could be, e.g., a project generating code that collects 
+  publicly available but not easily obtainable data, tidies and documents it 
+  and provides simple tools for exploration and export. Alternatively, it could 
+  be a collection of tools in your area of methodological or domain expertise, 
+  ideally distributed as a package. See the 
+  [ROpenSci project](https://ropensci.org) for inspiration. Or, you could 
+  provide a fully-functional replication kit for one of your current or past
+  research projects.
+- While working on your project, work through the second batch of the slide
+  deck. It will become available in mid-February 2020.
+- Produce and make your open science work available to the world.
+- Share your knowledge and maintain what you have done.
+
+  
+### Prerequisites
+
+Intermediate skills in statistics and some knowledge of a statistical 
+programming language  (e.g., Python, R or Stata) are required. We will mostly
+work with R during the seminar but students are free to use other languages for 
+their assignments if they prefer. Students that are not familiar with R are 
+strongly encouraged to work through the opening chapters of 
+[R for data science by Garrett Grolemund and Hadley Wickham](https://r4ds.had.co.nz)
+prior to attending the course.
 
 
 ### About the repository
@@ -45,7 +98,13 @@ Do not commit anything to these directories.
 
 ### Setting up the environment: The local way
 
-You need the following to run the code of the repo (Installation links for 
+**NOTE: This step requires you to make substantial changes to your computing 
+environment by installing various additional software. If you do not like that
+idea, consider using docker instead. This is generally a good idea as we will
+be using docker anyhow to build portable development environments and 
+replication kits. See below.**
+
+You need the following to run the code of the repository (Installation links for 
 Windows in brackets)
 
 - git: https://gitforwindows.org
@@ -55,13 +114,16 @@ Windows in brackets)
   Make sure that you include the Rtools directory in your path (you are asked
   about this during the installation). **NOTE: If you happen other GNU tools
   installed already (Cygwin or MinGW), please do not install RTools.** Instead,
-  verify that make is available and included in your path.
+  verify that make is available and included in your path. **NOTE: If you are
+  on MacOS, you do not need RTools.** Instead, install the XCode command line
+  tools: https://railsapps.github.io/xcode-command-line-tools.html.
 - Python3: https://www.python.org/downloads/
 
-Fork the repo on GitHub if you have not done it already.
+After installing these programs, fork this repository on GitHub.
 
-Once you have this up and running start RStudio. Create a new project ("File -> New Project -> Version Control"). Provide the link to your forked directory and 
-choose a local directory that will receive the cloned repo. 
+Once you have this up and running start RStudio. Create a new project ("File -> 
+New Project -> Version Control"). Provide the link to your forked directory and 
+choose a local directory that will receive the cloned repository. 
 
 After cloning your fork, you will have to install several packages in R that 
 the code relies on. Run the following in the R console (lower left corner).
@@ -78,12 +140,6 @@ devtools::install_github('wmurphyrd/fiftystater')
 webshot::install_phantomjs()
 ```
 
-Test whether you can run all code. In the Terminal (lower left corner) run:
-
-```
-make all
-```
-
 Continue with "Produce all Output" below.
 
 
@@ -93,7 +149,8 @@ First you need install docker. When you have
 new version of MacOS or Windows 10 Professional/Enterprise installed: https://docs.docker.com/get-started/. **Read the introductions
 for your operating system.** They are important.
 
-If you happen to have an older/less expensive version of Windows then docker toolbox is your choice: https://docs.docker.com/toolbox/. 
+If you happen to have an older/less expensive version of Windows then docker 
+toolbox is your choice: https://docs.docker.com/toolbox/. 
 **Read the introductions for your operating system.** They are important.
 
 After installing docker, verify that it is running by opening a shell/terminal
@@ -114,12 +171,14 @@ git remote -v
 ```
 
 The last command verifies that the new remote points to your forked 
-repo. 
+repository. 
 
 
 ### Produce all Output (data, slides and link list)
 
-Now you have your `sposm` project initialized. Test whether you can run all code. In the Terminal (lower left corner) run:
+Now you have your `sposm` project initialized. Test whether you can run all code
+to produce the data, the slides and the link list in the data directory. In the 
+Terminal (lower left corner) run:
 
 ```
 make all
@@ -127,7 +186,8 @@ make all
 
 ### Setting up git to allow syncing your fork with the main repository
 
-To add the main repository as an additional repository with the name `upstream`, open the terminal (lower left corner) and add the remote.
+To add the main repository as an additional repository with the name `upstream`, 
+open the terminal (lower left corner) and add the remote.
 
 ```
 git remote add upstream https://github.com/joachim-gassen/sposm.git
@@ -136,17 +196,23 @@ git remote -v
 
 To keep your fork in sync with the main repository, you need to follow the
 strategy explained here: https://help.github.com/en/articles/syncing-a-fork.
-Additional helpful info can be found here: https://gist.github.com/CristinaSolana/1885435. 
+Additional helpful info can be found here: 
+https://gist.github.com/CristinaSolana/1885435. 
 
 
 ### Tips and Tricks
 
-If you are having issues knitting the slides this might be because  `datamodelr` is not yet available on the CRAN. To install datamodelr from GitHub, run:
+#### If knitting fails...
+
+If you are having issues knitting the slides this might be because  `datamodelr` 
+is not yet available on the CRAN. To install `datamodelr` from GitHub, run:
 
 ```
 install.packages("devtools") # NOTE: you may have devtools already installed
 devtools::install_github("bergant/datamodelr")
 ```
+
+#### If localhost:8787 fails...
 
 When you use docker toolbox the docker container is not hosted on localhost but
 instead on a dedicated virtual machine that has a unique IP address. See the
