@@ -11,7 +11,8 @@ date:  |
   | `r loc <- Sys.getlocale(category = "LC_TIME"); Sys.setlocale("LC_TIME", "C"); fdate <- format(Sys.time(), '%B %d, %Y'); Sys.setlocale("LC_TIME", loc); fdate`
   
 output: 
-  beamer_presentation
+  beamer_presentation:
+    latex_engine: xelatex
 
 header-includes:
 - \usepackage{booktabs}
