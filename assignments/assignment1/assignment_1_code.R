@@ -1,5 +1,5 @@
-install.packages("wbstats")
-install.packages("magick")
+#install.packages("wbstats")
+#install.packages("magick")
 
 #####GET DATA FROM WORLD BANK 
 ###usage of wbstats: https://cengel.github.io/gearup2016/worldbank.html
