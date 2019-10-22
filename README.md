@@ -63,7 +63,7 @@ be useful for self-study. To do so:
   
 ### Prerequisites
 
-Intermediate skills in statistics and some knowledge of a statistical 
+Intermediate skills in statistics and knowledge of a statistical 
 programming language  (e.g., Python, R or Stata) are required. We will mostly
 work with R during the seminar but students are free to use other languages for 
 their assignments if they prefer. Students that are not familiar with R are 
