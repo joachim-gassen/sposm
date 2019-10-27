@@ -198,7 +198,39 @@ To keep your fork in sync with the main repository, you need to follow the
 strategy explained here: https://help.github.com/en/articles/syncing-a-fork.
 Additional helpful info can be found here: 
 https://gist.github.com/CristinaSolana/1885435. 
+If this is not sufficient to update your forked repository on Github, have a look here:
+https://stackoverflow.com/questions/7244321/how-do-i-update-a-github-forked-repository
 
+In a nutshell: Work-flow assuming that you have your forked remote repository
+as `origin` and the main repository as `upstream` and are working in your 
+local repository directory:
+
+```
+# make the changes from the main repository available locally
+
+git fetch upstream
+
+# Switch to your local main branch
+
+git checkout master
+
+# Use only one of the two below. See slide deck 2 for the difference between
+# merging and rebasing. Normally rebasing is only needed when you have changes
+# in your repo that you want to issue a pull request for after rebasing.
+
+# Alternative A: Merge the changes from upstream
+
+git merge upstream/master
+
+# Alternative B: rebase your local branch on upstream
+
+git rebase upstream/master
+
+# If this has worked out, make sure to push your chnanges to your own remote
+# The --force-with-lease is only needed when you are rebasing.
+
+git push --force-with-lease origin master
+```
 
 ### Tips and Tricks
 
