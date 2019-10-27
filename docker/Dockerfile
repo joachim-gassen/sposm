@@ -77,7 +77,7 @@ RUN tlmgr install multirow xcolor colortbl wrapfig float tabu varwidth \
 RUN  R -e "install.packages(c('kableExtra', 'ExPanDaR', 'ggmap', 'tidyr', \
   'tufte', 'showtext', 'cowplot', 'DiagrammeR', 'leaflet', 'widgetframe', \
   'zipcode', 'shiny', 'shinyjs', 'grid', 'gridExtra', 'ggwordcloud', 'tm', \
-  'qrcode', 'wbstats', 'magick', 'WDI', 'ggplot2', 'gganimate', 'directlabels', \
+  'qrcode', 'wbstats', 'magick', 'WDI', 'gganimate', 'directlabels', \
   'transformr', 'png'), \
   repos = c(CRAN = 'https://mran.microsoft.com/snapshot/2019-09-25'))"
 
