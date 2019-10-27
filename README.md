@@ -198,6 +198,15 @@ To keep your fork in sync with the main repository, you need to follow the
 strategy explained here: https://help.github.com/en/articles/syncing-a-fork.
 Additional helpful info can be found here: 
 https://gist.github.com/CristinaSolana/1885435. 
+If this is not sufficient to update your forked repository on Github, have a look here:
+https://stackoverflow.com/questions/7244321/how-do-i-update-a-github-forked-repository
+
+Work-flow
+1) Open Git Bash in local copy of git-repository
+2) git fetch upstream OR git pull origin master
+3) git checkout master
+4) git merge upstream/master OR git rebase upstream/master
+5) git push -f origin master
 
 
 ### Tips and Tricks
