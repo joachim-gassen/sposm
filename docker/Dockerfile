@@ -3,6 +3,9 @@
 
 # docker build -t sposm_ide .
 
+# to force to build, not from cache
+# docker build --no-cache -t sposm_ide .
+
 # (do not forget the dot!)
 
 # After the docker image has been built you can run it by
@@ -57,11 +60,12 @@ MAINTAINER Joachim Gassen "gassen@wiwi.hu-berlin.de"
 # Install some additional tools
 
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends nano curl python3-pip lbzip2
+  && apt-get install -y --no-install-recommends nano curl python3-pip lbzip2 cargo \
+  apt-utils libudunits2-dev libgdal-dev libproj-dev
 
 
 # Install some additional tex packages
-
+RUN tlmgr update --self
 RUN tlmgr option repository http://mirror.ctan.org/systems/texlive/tlnet
 
 RUN tlmgr update --self
@@ -78,7 +82,7 @@ RUN  R -e "install.packages(c('kableExtra', 'ExPanDaR', 'ggmap', 'tidyr', \
   'tufte', 'showtext', 'cowplot', 'DiagrammeR', 'leaflet', 'widgetframe', \
   'zipcode', 'shiny', 'shinyjs', 'grid', 'gridExtra', 'ggwordcloud', 'tm', \
   'qrcode', 'wbstats', 'magick', 'WDI', 'gganimate', 'directlabels', \
-  'transformr', 'png'), \
+  'transformr', 'png', 'gifski', 'animation'), \
   repos = c(CRAN = 'https://mran.microsoft.com/snapshot/2019-09-25'))"
 
 # Replacement repo as MRAN was flaky over the last days
