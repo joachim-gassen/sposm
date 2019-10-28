@@ -65,7 +65,6 @@ RUN apt-get update \
 
 
 # Install some additional tex packages
-RUN tlmgr update --self
 RUN tlmgr option repository http://mirror.ctan.org/systems/texlive/tlnet
 
 RUN tlmgr update --self
