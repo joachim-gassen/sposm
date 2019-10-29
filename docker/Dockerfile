@@ -60,8 +60,9 @@ MAINTAINER Joachim Gassen "gassen@wiwi.hu-berlin.de"
 # Install some additional tools
 
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends nano curl python3-pip lbzip2 cargo \
-  apt-utils libudunits2-dev libgdal-dev libproj-dev
+  && apt-get install -y --no-install-recommends nano curl python3-pip lbzip2 \
+  cargo apt-utils libudunits2-dev libgdal-dev libproj-dev libpython3-dev \
+  python3-tk ffmpeg
 
 
 # Install some additional tex packages
@@ -74,6 +75,15 @@ RUN tlmgr install multirow xcolor colortbl wrapfig float tabu varwidth \
   setspace footmisc csquotes beamer translator\
   && tlmgr path add 
   
+# Some python packages
+
+RUN pip3 install setuptools wheel 
+
+RUN pip3 install pandas numpy matplotlib 
+
+RUN pip3 install wbdata
+
+RUN ln -sf /usr/bin/python3 /usr/bin/python
 
 # And some R packages
 
@@ -81,7 +91,7 @@ RUN  R -e "install.packages(c('kableExtra', 'ExPanDaR', 'ggmap', 'tidyr', \
   'tufte', 'showtext', 'cowplot', 'DiagrammeR', 'leaflet', 'widgetframe', \
   'zipcode', 'shiny', 'shinyjs', 'grid', 'gridExtra', 'ggwordcloud', 'tm', \
   'qrcode', 'wbstats', 'magick', 'WDI', 'gganimate', 'directlabels', \
-  'transformr', 'png', 'gifski', 'animation'), \
+  'transformr', 'png', 'gifski', 'animation', 'reticulate'), \
   repos = c(CRAN = 'https://mran.microsoft.com/snapshot/2019-09-25'))"
 
 # Replacement repo as MRAN was flaky over the last days
