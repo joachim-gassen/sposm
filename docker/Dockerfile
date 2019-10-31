@@ -62,7 +62,7 @@ MAINTAINER Joachim Gassen "gassen@wiwi.hu-berlin.de"
 RUN apt-get update \
   && apt-get install -y --no-install-recommends nano curl python3-pip lbzip2 \
   cargo apt-utils libudunits2-dev libgdal-dev libproj-dev libpython3-dev \
-  python3-tk ffmpeg
+  python3-tk ffmpeg imagemagick
 
 
 # Install some additional tex packages
@@ -78,10 +78,9 @@ RUN tlmgr install multirow xcolor colortbl wrapfig float tabu varwidth \
 # Some python packages
 
 RUN pip3 install setuptools wheel 
-
 RUN pip3 install pandas numpy matplotlib 
-
-RUN pip3 install wbdata
+RUN pip3 install wbdata world_bank_data 
+RUN pip3 install IPython ffmpeg
 
 RUN ln -sf /usr/bin/python3 /usr/bin/python
 
