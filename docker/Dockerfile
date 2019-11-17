@@ -80,7 +80,7 @@ RUN tlmgr install multirow xcolor colortbl wrapfig float tabu varwidth \
 RUN pip3 install setuptools wheel 
 RUN pip3 install pandas numpy matplotlib 
 RUN pip3 install wbdata world_bank_data 
-RUN pip3 install IPython ffmpeg
+RUN pip3 install IPython ffmpeg regex
 
 RUN ln -sf /usr/bin/python3 /usr/bin/python
 
