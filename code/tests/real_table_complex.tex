@@ -1,0 +1,52 @@
+%% A simple real-life table from one of my current projects
+\documentclass[a4paper]{article}
+\usepackage{xcolor}
+\usepackage{threeparttable}
+\begin{document}
+\begin{center}
+\begin{table}[!htbp]
+\caption{\label{tab:regression_results}Regression Results}
+\centering
+\small
+\begin{threeparttable}
+\setlength{\tabcolsep}{2pt}
+\begin{tabular}{lcccccccc}
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+ & \multicolumn{4}{c}{Dependent variable: \textit{Life expectancy}} \\ 
+\cline{2-5} 
+\\[-1.8ex] & (1) & (2) & (3) & (4)\\ 
+\hline \\[-1.8ex] 
+ ln(\textit{GDP per capita}) & 5.211$^{***}$ & 3.709$^{***}$ & 3.741$^{***}$ & 1.499$^{***}$ \\ 
+  & (0.062) & (0.082) & (0.034) & (0.503) \\ 
+  & & & & \\ 
+ ln(\textit{Years of schooling}) &  & 6.432$^{***}$ & 6.006$^{***}$ & 6.851$^{***}$ \\ 
+  &  & (0.241) & (0.081) & (1.732) \\ 
+  & & & & \\ 
+ ln(\textit{Unemployment rate}) &  & $-$0.962$^{***}$ & $-$0.881$^{***}$ & 0.014 \\ 
+  &  & (0.108) & (0.124) & (0.364) \\ 
+  & & & & \\ 
+ Constant & 24.499$^{***}$ & 26.227$^{***}$ &  &  \\ 
+  & (0.524) & (0.496) &  &  \\ 
+  & & & & \\ 
+\hline \\[-1.8ex] 
+Fixed effects & None & None & Year & Country, Year \\ 
+Std. errors clustered & No & No & Year & Country, Year \\ 
+Observations & 4,139 & 4,139 & 4,139 & 4,139 \\ 
+$R^{2}$ & 0.632 & 0.687 & 0.696 & 0.968 \\ 
+Adjusted $R^{2}$ & 0.632 & 0.687 & 0.694 & 0.966 \\ 
+\hline 
+\hline \\[-1.8ex] 
+\end{tabular}
+\begin{tablenotes}[flushleft]
+\setlength{\labelsep}{0pt}
+\footnotetext
+\item Note: The dependent variable is the average life expectancy at birth in 
+years. OLS coefficients are reported together with standard errors in 
+parentheses. $^{*}$/$^{**}$/$^{***}$ indicate two-sided significance levels 
+of 10/5/1 \%, respectively.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+\end{center}
+\end{document}
