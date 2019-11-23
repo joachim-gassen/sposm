@@ -1,0 +1,17 @@
+%% This is a nasty table
+\documentclass[a4paper]{article}
+\usepackage{xcolor}
+\usepackage{multirow}
+\begin{document}
+\begin{center}
+\begin{tabular}{ | c | c | c | }\hline cell1 & \multicolumn { 2 } {|c|}
+{cell2 \& cell3} \\ 
+\hline
+\multirow{2}{4em}{cell4 \& 
+cell7} & \& cell5 & cell6 \\  
+\cline{2-3}
+& cell8 & cell9 \\
+\hline
+\end{tabular}
+\end{center}
+\end{document}
