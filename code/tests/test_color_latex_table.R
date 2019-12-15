@@ -59,7 +59,12 @@ for (i in 1:nrow(tab_sizes)) {
       write_file(color_latex_table(test_cases[i], cells, color), tex_file)
       pdflatex(tex_file, pdf_file = pdf_file)
       expect_true(file.exists(pdf_file))
-      system2('open', args = pdf_file, wait = TRUE)
+      
+      # All the things below do not work across platforms as 
+      # testthat uses a bare non RStudio envrironment
+      # system2('open', args = pdf_file, wait = TRUE)
+      # getOpt("viewer")(pdf_file)
+      # system2(Sys.getenv("R_PDFVIEWER"), args = pdf_file, wait = TRUE)
     }
   )
 }
