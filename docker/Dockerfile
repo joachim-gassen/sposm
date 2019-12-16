@@ -82,7 +82,9 @@ RUN pip3 install pandas numpy matplotlib
 RUN pip3 install wbdata world_bank_data 
 RUN pip3 install IPython ffmpeg regex
 RUN pip3 install pytest==3.10.1
-RUN pip3 install jupyterlab
+RUN pip3 install jupyterlab pandas_datareader
+RUN pip3 install pyfinance scipy
+RUN pip3 install seaborn math
 
 RUN ln -sf /usr/bin/python3 /usr/bin/python
 
