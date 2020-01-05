@@ -84,7 +84,7 @@ RUN pip3 install IPython ffmpeg regex
 RUN pip3 install pytest==3.10.1
 RUN pip3 install jupyterlab pandas_datareader
 RUN pip3 install pyfinance scipy
-RUN pip3 install seaborn math
+RUN pip3 install seaborn
 
 RUN ln -sf /usr/bin/python3 /usr/bin/python
 
