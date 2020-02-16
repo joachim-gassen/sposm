@@ -184,7 +184,7 @@ url_bt_open_data %>%
 ```
 \normalsize
 
-Reason: The web page is being created dyamically by Javascript (or similar) 
+Reason: The web page is being created dynamically by JavaScript (or similar) 
 
 
 ## The idea of headless browsing: meet Selenium
@@ -218,7 +218,7 @@ CC BY-NC-SA 4.0
 ## My task ...
 
 - Develop a function that parses the XML files of the Plenarprotokolle of the
-19th Legislaturperiode to extract all speaches into a tidy data structure
+19th Wahlperiode to extract all speaches into a tidy data structure
 
 - Implement some basic test routines verifying that the code works
 

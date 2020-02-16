@@ -76,9 +76,9 @@ kable(df, booktabs = TRUE, linesep = "")  %>%
 
 - In short: The build blocks of the World-Wide Web
 - Somewhat longer: Application Programming Interface(s) that allow clients to
-access services from servers in a stateless and cacheable way using uniform
+access services from servers in a stateless and cache-able way using uniform
 interfaces
-- This allows clients to be developed indepenently from servers and data to be 
+- This allows clients to be developed independently from servers and data to be 
 shared efficiently across dynamic networks
 
 
