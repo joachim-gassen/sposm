@@ -1,6 +1,7 @@
 library(tidyverse)
 library(rvest)
 library(lubridate)
+library(ExPanDaR)
 
 # --- Scrape Raw Data ----------------------------------------------------------
 
@@ -27,15 +28,16 @@ get_wiki_infobox <- function(url) {
   xml_data <- read_html(url) %>%
     html_node('#mw-content-text div table.infobox.vcard')
   
+  # To reflect page wraps in text caused by tags
   xml_find_all(xml_data, ".//br") %>% xml_add_sibling("p", "\n")
   xml_find_all(xml_data, ".//li") %>% xml_add_sibling("p", "\n")
-
+  
   if (class(xml_data) != "xml_missing") {
-      xml_data  %>%
-        html_table(fill = TRUE) %>%
-        rename(tag = X1, content = X2) %>%
-        filter(tag != "")
-    } else tibble(tag = "xml_missing", content = "TRUE")
+    xml_data  %>%
+      html_table(fill = TRUE) %>%
+      rename(tag = X1, content = X2) %>%
+      filter(tag != "")
+  } else tibble(tag = "xml_missing", content = "TRUE")
 }
 
 get_wiki_page_info <- function(url) {
@@ -55,7 +57,7 @@ get_wiki_page_info <- function(url) {
     page_info_html <-  
       paste0("https://en.wikipedia.org", path, "?action=info") %>%
       read_html()  
-  
+    
     page_info_html %>%
       html_node('#mw-content-text table:nth-child(6)') %>%
       html_table(fill = TRUE) -> df
@@ -93,11 +95,11 @@ load("data/sp500_wiki_raw.Rdata")
 get_min_4digits_from_str <- function(raw_str) {
   fyrs_list <- str_extract_all(raw_str, "\\d{4}")
   sapply(fyrs_list, 
-    function (x) ifelse(
-      length(x) > 0,
-      min(as.numeric(unlist(x))),
-      NA
-    )
+         function (x) ifelse(
+           length(x) > 0,
+           min(as.numeric(unlist(x))),
+           NA
+         )
   )
 }
 
@@ -129,7 +131,7 @@ which(duplicated(sp500_constituents$cik))
 
 # Extract data from 'Traded as' field
 
-mat <- str_split_fixed(sp500_wiki_info_box_raw$`Traded as`, fixed("\n"), n = 10)
+mat <- str_split_fixed(sp500_wiki_info_box_raw$`Traded as`, fixed("\n"), n = 10)
 
 # Check whether 10 fields is enough (it is)
 all(mat[, 10] == "") # TRUE
@@ -178,8 +180,6 @@ trading_raw_str_long %>%
     djia = any(djia)
   ) -> sp500_index_membership
 
-table(sp500_index_membership$trading_raw_str)
-
 sp500_founded_website <- sp500_wiki_info_box_raw %>%
   mutate (
     founded_as_in_info_box = get_min_4digits_from_str(Founded),
@@ -220,8 +220,9 @@ sp500_ticker_isin %>%
 # digging for dual shares would be required. I am leaving this to the
 # interested reader ;-)
 
-remove_wiki_footnote <- function(raw_string) {
-  str_remove_all(raw_string, regex("\\[\\d+\\]"))
+remove_wiki_footnote <- function(raw_string, numbers_only = FALSE) {
+  if (numbers_only) str_remove_all(raw_string, regex("\\[\\d+\\]"))
+  else str_remove_all(raw_string, regex("\\[[\\w\\s]+\\]"))
 }
 
 people <- str_split_fixed(
@@ -259,6 +260,10 @@ as_tibble(people, .name_repair = NULL) %>%
 
 # I spotted some left-over parsing problems. I am leaving those and a separation
 # of 'people_str' into names and roles for future work
+
+
+# The function below will most likely silently fail in some instances. 
+# For most of the data it works though.
 
 extract_value <- function(raw_str, monetary = TRUE) {
   raw_str <- remove_wiki_footnote(raw_str)
@@ -308,7 +313,7 @@ sp500_wiki_info_box_raw %>%
          net_income_musd, net_income_str, total_assets_musd, total_assets_str,
          total_equity_musd, total_equity_str, employees, employees_str) %>% 
   bind_cols(ticker = sp500_constituents$ticker, .) -> sp500_financials
- 
+
 
 sp500_base_data <- sp500_constituents %>%
   left_join(sp500_founded_website, by = "ticker") %>%
@@ -351,14 +356,19 @@ sp500_wiki_page_info_raw %>%
   bind_cols(ticker = sp500_constituents$ticker, .) -> sp500_wiki_data
 
 
-  
 save(
   sp500_base_data,
+  sp500_wiki_data,
   sp500_people,
   sp500_ticker_isin, 
-  file = "data/sp500_wiki_raw.Rdata"
+  file = "data/sp500_wiki_clean.Rdata"
 ) 
 
-rownames(sp500_base_data) <- sp500_base_data$name
-library(ExPanDaR)
-ExPanD(sp500_base_data)
+# --- Some quick exploration ---------------------------------------------------
+
+load("data/sp500_wiki_clean.Rdata")
+
+sp500_data <- sp500_base_data %>%
+  left_join(sp500_wiki_data, by = "ticker")
+rownames(sp500_data) <- sp500_base_data$name
+ExPanD(sp500_data)

@@ -13,7 +13,15 @@ sposm19_time_table <- tibble(
             ymd_hm("2019-10-11 9:00"), ymd_hm("2019-10-11 10:30"),
             ymd_hm("2019-10-11 11:00"), ymd_hm("2019-10-11 12:30"),
             ymd_hm("2019-10-11 13:30"), ymd_hm("2019-10-11 14:30"),
-            ymd_hm("2019-10-11 15:30"), ymd_hm("2019-10-11 16:00")),
+            ymd_hm("2019-10-11 15:30"), ymd_hm("2019-10-11 16:00"),
+            ymd_hm("2020-02-17 10:00"), ymd_hm("2020-02-17 10:30"),
+            ymd_hm("2020-02-17 12:00"), ymd_hm("2020-02-17 13:30"),
+            ymd_hm("2020-02-17 15:00"), ymd_hm("2020-02-17 15:30"),
+            ymd_hm("2020-02-17 16:30"),
+            ymd_hm("2020-02-18 9:00"), ymd_hm("2020-02-18 10:30"),
+            ymd_hm("2020-02-18 11:00"), ymd_hm("2020-02-18 12:30"),
+            ymd_hm("2020-02-18 13:30"), ymd_hm("2020-02-18 15:00"),
+            ymd_hm("2020-02-18 15:30")),
   title = c("Welcome and Introduction", 
             "The development environment and project organization",
             "Coffee", "Using Git and Github", "Lunch",
@@ -24,7 +32,13 @@ sposm19_time_table <- tibble(
             "Debugging tools", "Lunch and coffee",
             "Relational databases and the concept of normalized data",
             "Data wrangling and visualization fundamentals",
-            "Assignments and wrap up", "End of event")
+            "Assignments and wrap up", "End of event",
+            "Welcome and Coffee", "Tidy data scraping", "Lunch", 
+            "Code along: Unit testing in function development", "Coffee",
+            "Group work presentations", "End of Day",
+            "Explore your researcher degrees of freedom", "Coffee", 
+            "Providing data access via RESTful APIs", "Lunch",
+            "Group Work Presentations", "Coffee and Wrap Up", "End of Event")
 )
 
 # 'Corporate' colors used by our TRR 266 Accountinig for Transparency project

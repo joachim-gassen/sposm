@@ -279,7 +279,7 @@ count_distinct_obs(data.frame(a = 1:10), a)
 
 \tiny
 ```{r, eval = FALSE}
-#' @title Counts the destinct observations for a sub-set of a data frame
+#' @title Counts the distinct observations for a sub-set of a data frame
 #'
 #' @description
 #' Reads a data frame and counts the number of distinct observations based 

@@ -1,0 +1,226 @@
+---
+title: |
+  | Statistical Programming 
+  | and Open Science Methods
+subtitle: |
+  | Tidy data scraping
+author: | 
+  | Joachim Gassen 
+  | Humboldt-Universität zu Berlin
+date:  |
+  | `r loc <- Sys.getlocale(category = "LC_TIME"); Sys.setlocale("LC_TIME", "C"); fdate <- format(Sys.time(), '%B %d, %Y'); Sys.setlocale("LC_TIME", loc); fdate`
+  
+output: 
+  beamer_presentation
+
+header-includes:
+- \usepackage{booktabs}
+- \usepackage{graphicx}
+- \usepackage{xcolor}
+- \usepackage{array}
+- \usepackage{longtable}
+- \usepackage{multirow}
+- \usepackage{wrapfig}
+- \usepackage{float}
+- \usepackage{colortbl}
+- \usepackage{pdflscape}
+- \usepackage{tabu}
+- \usepackage{threeparttable}
+- \usepackage{threeparttablex}
+- \usepackage[normalem]{ulem}
+- \usepackage{makecell}
+- \setbeamertemplate{itemize subitem}{-}
+- \titlegraphic{\includegraphics[width=6cm]{media/trr266_logo_white_background.png}}
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, table.align = "center",  message = FALSE, error = FALSE, warning = FALSE, clean = FALSE)
+library(knitr)
+library(kableExtra)
+library(tufte)
+library(tidyverse)
+
+opts_knit$set(fig.pos = 'h')
+source("../code/utils.R")
+
+# The following allows one to use Stata in RMarkdown 
+# Nice but not open science ;-)
+# original version
+# devtools::install_github("hemken/Statamarkdown")
+# Fork that fixed Mac bug non finding the Stata executable
+# devtools::install_github("remlapmot/Statamarkdown",  ref = "macos-bug-fixes")
+# library(Statamarkdown)
+
+```
+
+
+## Time table Monday, February 17
+
+``` {r ttableMon, echo = FALSE}
+df <- sposm19_time_table %>%
+  filter(day(dtime) == day("2019-02-17")) %>%
+  mutate(dtime = format(dtime, "%H:%M"))
+
+breaks <- which(str_detect(df$title, "Lunch") | str_detect(df$title, "Coffee"))
+
+names(df) <- c("When?", "What?")
+kable(df, booktabs = TRUE, linesep = "")  %>%
+  kable_styling(latex_options = c("striped", "scale_down"),
+                stripe_index = breaks) %>%
+  row_spec(1:2, background = trr266_lightpetrol)
+```
+
+
+## Time table Tuesday, February 18
+
+``` {r ttableTue, echo = FALSE}
+df <- sposm19_time_table %>%
+  filter(day(dtime) == day("2019-02-18")) %>%
+  mutate(dtime = format(dtime, "%H:%M"))
+
+breaks <- which(str_detect(df$title, "Lunch") | str_detect(df$title, "Coffee"))
+
+names(df) <- c("When?", "What?")
+kable(df, booktabs = TRUE, linesep = "")  %>%
+  kable_styling(latex_options = c("striped", "scale_down"),
+                stripe_index = breaks) 
+```
+
+
+## Parsing an HTML table I
+
+\begin{center}
+\includegraphics[width=\textwidth]{media/scraping_01.png} 
+\end{center}
+
+
+## Parsing an HTML table II
+
+\begin{center}
+\includegraphics[width=\textwidth]{media/scraping_02.png} 
+\end{center}
+
+
+## Parsing an HTML table III
+
+\footnotesize
+```{r parseTable, eval=FALSE}
+library(tidyverse)
+library(rvest)
+
+url_sp500_const <- paste0(
+  "https://en.wikipedia.org/wiki/",
+  "List_of_S%26P_500_companies"
+)
+
+url_sp500_const %>%
+  read_html() %>%
+  html_node(xpath = '//*[@id="constituents"]') %>%
+  html_table() -> sp500_constituents_raw
+```
+\normalsize
+
+
+## Retrieving local URLs from within table I
+
+\begin{center}
+\includegraphics[width=\textwidth]{media/scraping_03.png} 
+\end{center}
+
+
+## Retrieving local URLs from within table II
+
+```{r parseLinks, eval=FALSE}
+url_sp500_const %>%
+  read_html() %>%
+  html_node(xpath = '//*[@id="constituents"]') %>%
+  html_nodes("td:nth-child(2) a") %>% 
+  html_attr("href")-> links
+```
+
+
+## Scraping ill-structured tables I
+
+\begin{center}
+\includegraphics[width=\textwidth]{media/scraping_04.png} 
+\end{center}
+
+
+## Scraping ill-structured tables II
+
+\footnotesize
+```{r infoBox, eval=FALSE}
+xml_data <- read_html(url) %>%
+  html_node('#mw-content-text div table.infobox.vcard')
+
+xml_data  %>%
+  html_table(fill = TRUE) %>%
+  rename(tag = X1, content = X2) %>%
+  filter(tag != "")
+```
+\normalsize
+
+
+## Another approach to scraping
+
+\begin{center}
+\includegraphics[height=0.8\textheight]{media/scraping_05.png} 
+\end{center}
+
+
+## This won't work
+
+\footnotesize
+```{r scapingFail, error=TRUE}
+library(rvest)
+
+url_bt_open_data <- "https://www.bundestag.de/services/opendata"
+url_bt_open_data %>%
+  read_html() %>%
+  html_node(
+    xpath = '//*[@id="bt-collapse-543410"]/div[1]/div/div/div[1]/table'
+  ) %>% html_table() -> pp_table
+```
+\normalsize
+
+Reason: The web page is being created dyamically by Javascript (or similar) 
+
+
+## The idea of headless browsing: meet Selenium
+
+\begin{center}
+\includegraphics[width=0.1\textwidth]{media/selenium_logo.png} 
+\end{center}
+\vspace{24pt}
+- Selenium offers a way to script a web browser so that data can be scraped
+using the navigation that a web page provides
+
+- Allows for various web browser and all sorts of user web browser interaction
+
+- Uses a docker container holding the actual browser environment
+
+- See `code/btag_open_data_scrape_data.R` for a demonstration on how to use it
+
+
+## Parsing XML Data
+
+\begin{center}
+\includegraphics[height=0.7\textheight]{media/xml_tree_navigate.pdf} 
+\end{center}
+\footnotesize
+Gaston Sanchez, https://github.com/gastonstat/tutorial-R-web-data
+\linebreak
+CC BY-NC-SA 4.0
+\normalsize
+
+
+## My task ...
+
+- Develop a function that parses the XML files of the Plenarprotokolle of the
+19th Legislaturperiode to extract all speaches into a tidy data structure
+
+- Implement some basic test routines verifying that the code works
+
+- See `code/btag_open_data_scrape_data.R` and 
+`code/test/test_btag_open_data_scrape_data.R`
