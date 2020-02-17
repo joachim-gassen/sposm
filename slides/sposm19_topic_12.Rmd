@@ -1,0 +1,349 @@
+---
+title: |
+  | Statistical Programming 
+  | and Open Science Methods
+subtitle: |
+  | Explore your researcher degrees of freedom
+author: | 
+  | Joachim Gassen 
+  | Humboldt-Universität zu Berlin
+date:  |
+  | `r loc <- Sys.getlocale(category = "LC_TIME"); Sys.setlocale("LC_TIME", "C"); fdate <- format(Sys.time(), '%B %d, %Y'); Sys.setlocale("LC_TIME", loc); fdate`
+  
+output: 
+  beamer_presentation
+
+header-includes:
+- \usepackage{booktabs}
+- \usepackage{graphicx}
+- \usepackage{xcolor}
+- \usepackage{array}
+- \usepackage{longtable}
+- \usepackage{multirow}
+- \usepackage{wrapfig}
+- \usepackage{float}
+- \usepackage{colortbl}
+- \usepackage{pdflscape}
+- \usepackage{tabu}
+- \usepackage{threeparttable}
+- \usepackage{threeparttablex}
+- \usepackage[normalem]{ulem}
+- \usepackage{makecell}
+- \usepackage{adjustbox}
+- \setbeamertemplate{itemize subitem}{-}
+- \titlegraphic{\includegraphics[width=6cm]{media/trr266_logo_white_background.png}}
+- \definecolor{trr266petrol}{RGB}{27,138,143}
+- \definecolor{trr266blue}{RGB}{110,202,226}
+- \definecolor{trr266yellow}{RGB}{255,180,59}
+- \definecolor{trr266red}{RGB}{148,70,100}
+- \newcommand{\code}{\texttt}
+- \newcommand{\bcenter}{\begin{center}}
+- \newcommand{\ecenter}{\end{center}}
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, table.align = "center",  message = FALSE, error = FALSE, warning = FALSE, clean = FALSE)
+library(knitr)
+library(kableExtra)
+library(tufte)
+library(tidyverse)
+library(ExPanDaR)
+library(rdfanalysis)
+
+opts_knit$set(fig.pos = 'h')
+source("../code/utils.R")
+
+# The following allows one to use Stata in RMarkdown 
+# Nice but not open science ;-)
+# original version
+# devtools::install_github("hemken/Statamarkdown")
+# Fork that fixed Mac bug non finding the Stata executable
+# devtools::install_github("remlapmot/Statamarkdown",  ref = "macos-bug-fixes")
+# library(Statamarkdown)
+
+```
+
+```{r prepare_data, include=FALSE}
+read_csv("../raw_data/restrans_data.csv", col_types = cols()) %>%
+  mutate_at(c("country", "year"), as.factor) %>%
+  mutate_at(c("life_expectancy", "gdp_capita",
+              "mn_yrs_school", "unemployment"), list(ln = log)) -> smp_all
+
+smp_no_na <- smp_all %>% na.omit
+
+var_def <- read_csv("../raw_data/restrans_data_def.csv", col_types = cols())
+
+for (var in c("life_expectancy", "mn_yrs_school", 
+              "mn_yrs_school", "unemployment")) {
+  var_def <- rbind(var_def,
+                   list(paste0(var, "_ln"), 
+                        paste("Log-transformed version of", var), "numeric", 1))
+}
+```
+
+## Time table Tuesday, February 18
+
+``` {r ttableTue, echo = FALSE}
+df <- sposm19_time_table %>%
+  filter(day(dtime) == day("2019-02-18")) %>%
+  mutate(dtime = format(dtime, "%H:%M"))
+
+breaks <- which(str_detect(df$title, "Lunch") | str_detect(df$title, "Coffee"))
+
+names(df) <- c("When?", "What?")
+kable(df, booktabs = TRUE, linesep = "")  %>%
+  kable_styling(latex_options = c("striped", "scale_down"),
+                stripe_index = breaks) %>% 
+  row_spec(1, background = trr266_lightpetrol)
+```
+
+
+## Motivation
+
+\begin{center}
+\includegraphics[height=0.7\textheight]{media/leamer_aer_1983_37f.png} \\
+Leamer (AER 1983: 37f.)
+\end{center}
+
+
+## Slightly more systematic ...
+
+\begin{center}
+\includegraphics[height=0.8\textheight]{media/wicherts_et_al_2016_table_1_p3.png} \\
+Wicherts et al (Frontiers in Psychology 2016: 3)
+\end{center}
+
+
+## Objective
+
+Development of a statistical computing framework for a "multiverse analysis" (Steeger et al., Persp on Psych Sci 2016) that
+
+- supports research design development separate from data,
+- supports pre-registering of observational data research designs,
+- facilitates a priori power analysis,
+- promotes unit testing,
+- generates well documented and easily portable code,
+- makes researcher degrees of freedom (Simmons et al., Psyc Science 2011) explicit in code, and
+- allows for rigorous robustness checking by exhausting all these degrees of freedom algorithmically. 
+
+Note: Code based walk-through on what follows: https://joachim-gassen.github.io/rdfanalysis/articles/analyzing_rdf.html
+
+## Workflow
+
+1. Sketch the \textcolor{black}{\code{design}}, the \textcolor{trr266yellow}{\code{result}} and the required \textcolor{trr266petrol}{\code{steps}} to generate it
+2. Develop test code for \textcolor{gray}{\code{input}} data
+3. Develop function to simulate \textcolor{gray}{\code{input}} data. Verify it with test code
+4. For each \textcolor{trr266petrol}{\code{step}}
+    - Draft \textcolor{trr266petrol}{\code{step\_description}} and develop test code
+    - Identify and implement potential \textcolor{trr266blue}{\code{choices}}. Document them by providing the \textcolor{trr266blue}{\code{choice\_description}}
+    - Verify that \textcolor{trr266petrol}{\code{step}} passes tests
+5. Verify that \textcolor{black}{\code{design}} produces unbiased \textcolor{trr266yellow}{\code{results}} consistent with simulated effect sizes
+6. Run power simulation with your a priori estimation of effect size
+7. Register your priors about choices by assigning \textcolor{gray}{\code{weights}}
+8. Run \textcolor{black}{\code{design}} with real data and interpret \textcolor{trr266yellow}{\code{result}}
+
+
+## Implementation of a \textcolor{black}{\code{design}}
+
+* A `design` consists of  \textcolor{trr266petrol}{\code{steps}}. 
+* Each \textcolor{trr266petrol}{\code{step}} reads the \textcolor{gray}{\code{output}} of the prior \textcolor{trr266petrol}{\code{step}} as \textcolor{gray}{\code{input}} and can contain any number of 
+    - \textcolor{trr266blue}{\code{discrete choices}} and
+    - \textcolor{trr266red}{\code{continuous choices}}
+* The output of the final \textcolor{trr266petrol}{\code{step}} provides the \textcolor{trr266yellow}{\code{result}}
+* By referring to the \textcolor{gray}{\code{protocol}} of prior \textcolor{gray}{\code{choices}}, this set-up can be used to design arbitrarily complex forking paths (Gelman and Loken, Am Scientist 2011)
+
+
+## A case study: Preston (1975)
+
+\begin{center}
+\includegraphics[height=0.7\textheight]{media/preston_1975_p235.png}
+Preston (1975): The Changing Relation between Mortality and level
+of Economic Development, Population Studies (29): 235.
+\end{center}
+
+
+## Descriptive Statistics
+
+```{r tab_descriptives_sample, echo = FALSE, results="asis", out.height="\\textheight"}
+df <- smp_no_na %>% 
+  select(life_expectancy, gdp_capita, mn_yrs_school, unemployment) %>%
+  mutate(gdp_capita = gdp_capita/1000)
+
+t <- prepare_descriptive_table(df)
+
+desc_rnames <- c(
+  "\\textit{Life expectancy}", 
+  "\\textit{GDP per capita}", 
+  "\\textit{Years of schooling}", 
+  "\\textit{Unemplyoment rate}"
+)
+rownames(t$df) <- desc_rnames
+names(t$df)[c(5,7)] <- c("25 \\%", "75 \\%")
+kable(t$df, digits = c(0, 1, 1, 1, 1, 1, 1, 1), format = "latex",
+      format.args = list(decimal.mark = ".", big.mark = ",", 
+                         scientific=FALSE),
+      booktabs = TRUE, escape = FALSE, linesep = "") -> kab_latex
+
+lat_tab <- unlist(strsplit(kab_latex, "\n"))
+lat_tab[3] <- "\\\\[-1.8ex]\\hline \\hline \\\\[-1.8ex]"
+lat_tab[5] <- "\\hline\\\\[-1.8ex]"
+lat_tab[length(lat_tab) - 1] <- "\\\\[-1.8ex]\\hline \\hline \\\\[-1.8ex]"
+
+latex_tab <- c("\\begin{threeparttable}",
+               lat_tab[2:length(lat_tab)],
+               "\\begin{tablenotes}[flushleft]",
+               "\\setlength{\\labelsep}{0pt}",
+               sprintf("\\item Note: The data is obtained from the World Bank and the Wittgenstein Center. The sample covers %d countries and the period %d to %d. \\textit{GDP per captia} are in constant 2010 thousand U.S. dollars.", length(unique(smp_no_na$country)),
+                       min(as.numeric(as.character(smp_no_na$year))), 
+                       max(as.numeric(as.character(smp_no_na$year)))),
+               "\\end{tablenotes}",
+               "\\end{threeparttable}")
+
+cat("\\centering \\adjustbox{max height=\\dimexpr\\textheight-6cm\\relax, max width=\\textwidth}{")
+cat(paste(latex_tab, collapse = "\n"))  
+cat("}")
+```
+
+
+## Regression Results
+
+```{r estimate_models, include=FALSE}
+res <-  prepare_regression_table(
+  smp_no_na,
+  dvs = rep("life_expectancy", 4),
+  idvs = list(
+    "gdp_capita_ln", 
+    c("gdp_capita_ln", "mn_yrs_school_ln", "unemployment_ln"),
+    c("gdp_capita_ln", "mn_yrs_school_ln", "unemployment_ln"),
+    c("gdp_capita_ln", "mn_yrs_school_ln", "unemployment_ln")
+  ),
+  feffects = list("", "", "year", c("country", "year")),
+  clusters = list("", "", "year", c("country", "year")),
+  format = "latex"
+)
+min_est = min(confint(res$models[[1]]$model)[2, 1],
+              confint(res$models[[2]]$model)[2, 1],
+              confint(res$models[[3]]$model)[1, 1],
+              confint(res$models[[4]]$model)[1, 1])
+              
+max_est = max(confint(res$models[[1]]$model)[2, 2],
+              confint(res$models[[2]]$model)[2, 2],
+              confint(res$models[[3]]$model)[1, 2],
+              confint(res$models[[4]]$model)[1, 2])
+```
+
+```{r tab_regression_results, echo = FALSE, results='asis'}
+
+vars_out <- c("gdp\\_capita\\_ln", "mn\\_yrs\\_school\\_ln", 
+              "unemployment\\_ln", "country", "year")
+vars_in <- c("ln(\\textit{GDP per capita})", "ln(\\textit{Years of schooling})",
+             "ln(\\textit{Unemployment rate})", "Country", "Year")
+tb <- res$table
+
+for (i in 1:length(vars_out)) {
+  tb <- str_replace_all(tb, fixed(vars_out[i]), vars_in[i])
+}
+
+
+tb[10] <- " & \\multicolumn{4}{c}{Dependent variable: \\textit{Life expectancy}} \\\\ "  
+latex_tab <- c("\\small",
+               "\\begin{threeparttable}",
+               "\\setlength{\\tabcolsep}{2pt}",
+               "\\begin{tabular}{lcccccccc}",
+               tb[8:11], tb[13:27], tb[29:35],
+               "\\end{tabular}",
+               "\\begin{tablenotes}[flushleft]",
+               "\\setlength{\\labelsep}{0pt}",
+               "\\item Note: The dependent variable is the average life expectancy at birth in years. OLS coefficients are reported together with standard errors in parentheses. $^{*}$/$^{**}$/$^{***}$ indicate two-sided significance levels of 10/5/1 \\%, respectively.",
+               "\\end{tablenotes}",
+               "\\end{threeparttable}")
+
+cat("\\centering \\adjustbox{max height=\\dimexpr\\textheight-6cm\\relax, max width=\\textwidth}{")
+cat(paste(latex_tab, collapse = "\n"))  
+cat("}")
+```
+
+
+## The steps and their discrete/continuous choices
+
+\begin{center}
+\includegraphics[height=0.85\textheight]{media/rdf_design.png}
+\end{center}
+
+
+## Optional: A power analysis on simulated data I
+
+\begin{center}
+\includegraphics[width=0.85\textwidth]{media/rdf_check_power_1.png} \\
+Power estimation based on an assumed effect size of one year for a 10 % 
+increase of GDP per capita. Each country has 15 years of data. n: Number of 
+countries in sample.
+\end{center}
+
+
+## Optional: A power analysis on simulated data II
+
+\begin{center}
+\includegraphics[width=0.85\textwidth]{media/rdf_check_power_2.png} \\
+Power estimation based on an assumed effect size of one year for a 10 % 
+increase of GDP per capita. Each country has 15 years of data. n: Number of 
+countries in sample.
+\end{center}
+
+
+## Estimate the effect size on real data
+
+``` {r exhaust_weighted_ests, include = "FALSE", results = "hide"}
+load(url("https://joachim-gassen.github.io/data/rdf_ests.RData"))
+```
+``` {r table_weighted_results, echo = FALSE, results='asis'}
+
+kable(weighted_ests, digits = 3, booktabs = TRUE, linesep = "",
+      format = "latex") -> kab_latex
+lat_tab <- unlist(strsplit(kab_latex, "\n"))
+
+cat("\\centering \\adjustbox{max height=\\dimexpr\\textheight-6cm\\relax, max width=\\textwidth}{")
+cat(paste(lat_tab, collapse = "\n"))  
+cat("}")
+
+```
+
+And the weighted average estimate is:
+
+``` {r estimate_weighted_effect, echo = FALSE}
+weighted_eff <- calculate_weighted_estimate(weighted_ests, "est", "lb", "ub")
+kable(as.data.frame(weighted_eff), digits = 3, booktabs = TRUE, linesep = "")
+```
+
+
+## Some but not all of the researcher degrees of freedom
+
+```{r SepcCurve, cache = TRUE, echo = FALSE, fig.align="center", out.width="\\textwidth"}
+df <- ests %>%
+  filter(na.omit == "no",
+         outlier_cutoff == 0 | outlier_cutoff == 0.01 | outlier_cutoff == 0.05,
+         cluster == "ctryyear") %>%
+  select(-na.omit, -cluster)
+attr(df, "choices") <- 1:5
+plot_rdf_spec_curve(df, "est", "lb", "ub", 
+                    est_label = expression(Delta*" Life expectancy (yrs)"), pt_size = 0.5,
+                    choice_ind_point = FALSE) 
+```
+
+
+## And an interactive variant of it
+
+\bcenter
+
+https://jgassen.shinyapps.io/shiny_rdf_spec_curve/
+
+\ecenter
+
+## For further info and code
+
+\bcenter
+
+https://joachim-gassen.github.io/rdfanalysis
+
+\ecenter

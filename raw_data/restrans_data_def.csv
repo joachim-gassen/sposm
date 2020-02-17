@@ -1,0 +1,16 @@
+var_name,var_def,type
+iso3c,Three letter ISO country code as used by World Bank,cs_id
+country,Country name as used by World Bank,factor
+region,World Bank regional country classification,factor
+income,World Bank income group classification,factor
+year,Calendar year of observation,ts_id
+life_expectancy,"Life expectancy at birth, total (years) 
+Note: Life expectancy at birth indicates the number of years a newborn infant would live if prevailing patterns of mortality at the time of its birth were to stay the same throughout its life. 
+Source: (1) United Nations Population Division. World Population Prospects: 2019 Revision, or derived from male and female life expectancy at birth from sources such as: (2) Census reports and other statistical publications from national statistical offices, (3) Eurostat: Demographic Statistics, (4) United Nations Statistical Division. Population and Vital Statistics Reprot (various years), (5) U.S. Census Bureau: International Database, and (6) Secretariat of the Pacific Community: Statistics and Demography Programme.",numeric
+gdp_capita,"GDP per capita (constant 2010 US$) 
+Note: GDP per capita is gross domestic product divided by midyear population. GDP is the sum of gross value added by all resident producers in the economy plus any product taxes and minus any subsidies not included in the value of the products. It is calculated without making deductions for depreciation of fabricated assets or for depletion and degradation of natural resources. Data are in constant 2010 U.S. dollars. 
+Source: World Bank national accounts data, and OECD National Accounts data files.",numeric
+mn_yrs_school,"Mean number of years spent in school, age group 15+. Source: Wittgenstein Centre for Demography and Global Human Capital (2018). Wittgenstein Centre Data Explorer Version 2.0. Data between five year intervals are based on linear interpolation.",numeric
+unemployment,"Unemployment, total (% of total labor force) (modeled ILO estimate) 
+Note: Unemployment refers to the share of the labor force that is without work but available for and seeking employment. 
+Source: International Labour Organization, ILOSTAT database. Data retrieved in September 2019.",numeric
