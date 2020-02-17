@@ -25,6 +25,7 @@ url_sp500_const %>%
 links <- paste0("https://en.wikipedia.org", links)
 
 get_wiki_infobox <- function(url) {
+  url <- links[2]
   xml_data <- read_html(url) %>%
     html_node('#mw-content-text div table.infobox.vcard')
   
@@ -118,7 +119,7 @@ sp500_constituents <- sp500_constituents_raw %>%
   select(ticker, cik, name, gics_sector, gics_sub_sector, hquarter, 
          date_first_added, year_first_founded)
 
-# Check whether 'ticker' is unique (is is)
+# Check whether 'ticker' is unique (it is)
 
 any(duplicated(sp500_constituents$ticker)) # FALSE
 
