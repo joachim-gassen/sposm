@@ -19,7 +19,7 @@ slides: data ${SLIDES_PDF} clean_slides_dir
 
 %.pdf: %.Rmd code/utils.R
 	Rscript -e "rmarkdown::render('$*.Rmd')"
-	rm $*.tex
+	rm -f $*.tex
 	
 %.html: %.Rmd
 	Rscript -e "rmarkdown::render('$*.Rmd')"

@@ -96,13 +96,13 @@ paramount in applied econometrics: miss-coded data
 
 * Data in econometrics only rarely has unambiguous measurement properties
 
-* Money is opinion
+* Money is an opinion
 
 * Magnitudes of measures are heavily affected by the size of the data generating
 unit (firm, countries, etc.)
 
 * A common remedy is to size-adjust measures by deflating but this sometimes
-tend to introduce new problems
+tends to introduce new problems
 
 
 ## A macro example that we all know

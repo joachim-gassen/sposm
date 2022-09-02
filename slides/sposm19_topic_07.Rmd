@@ -397,7 +397,7 @@ dm_render_graph(graph)
 
 * Using database solutions external to your own programming code has many advantages
 * Your can access your data from various platforms
-* RDMBS take care of potential race conditions when concurrent access is feasible
+* RDBMS take care of potential race conditions when concurrent access is feasible
 * Data integrity is maintained across applications
 * Query speed (at least in many cases)
 

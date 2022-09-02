@@ -2,26 +2,22 @@
 
 ### Welcome! 
 
-This is the repository to a brand-new and in-development statistical 
-programming and open science course. It is being developed by me (Joachim 
-Gassen) and is being offered under the research program of the 
+This is the repository of a statistical programming and open science course that we offered 2019/2020 under the research program of the 
 [TRR 266 "Accounting for Transparency"](https://www.accounting-for-transparency.de).
 
-It communicates how to conduct data-based research so that others can contribute
-and collaborate. This involves making your research data and methods FAIR 
-(findable, accessible, interoperable and reusable) and your results reproducible. 
+It communicates how to conduct data-based research so that others can contribute and collaborate. This involves making your research data and methods FAIR (findable, accessible, interoperable and reusable) and your results reproducible. 
 
-After this course, participants will
+After completing this course, participants will
 
 -	be able to use common collaboration tools in software development like 
   Git and Github,
-- know how to set up a portable and time-independent development environment
+- know how to set up a portable and time-stable development environment
   in a docker container,
 -	understand how to use functional and object-oriented programming approaches 
   to develop accessible code,
 -	be capable to develop test routines and debug code,
 -	have gained an understanding on how to profile code,
--	have developed routines for standard data analysis tasks, like data scraping, 
+-	have developed routines for standard data analysis tasks, like data scraping,
   cleaning and visualization, 
 -	have understood how to package statistical applications so that they are 
   portable across platforms, and
@@ -36,16 +32,14 @@ assignments and group work in between. Students are free to prepare their
 assignments using a statistical programming language of their choice.
 
 While the course is designed as a blended learning event, it might also
-be useful for self-study. To do so:
+be useful for self-study. If you just want to have a quick look, check the slides in `slides_pdf`. For a deep dive, do the following:
 
 - Set up the development environment as described below.
 - Produce data, slides and additional info by running `make all`.
-- Work through the slides for Topics 1 to 9. Doing so, it is also useful to take
-  a look at the source code of the slides if you are familiar with R.
+- Work through the slides for Topics 1 to 9. Doing so, it is also useful to take a look at the source code of the slides if you are familiar with R.
 - Work with the literature that is provided in the 
   [link list](docs/link_list.md) and on the slides.
-- Try your luck with the individual assignments. They will be announced as GitHub
-  issues throughout the period October 2019 to January 2020.
+- Try your luck with the individual assignments. They will be announced as GitHub issues throughout the period October 2019 to January 2020.
 - Pick a small project that you expect to contribute to the Open Science
   community. This could be, e.g., a project generating code that collects 
   publicly available but not easily obtainable data, tidies and documents it 
@@ -56,7 +50,7 @@ be useful for self-study. To do so:
   provide a fully-functional replication kit for one of your current or past
   research projects.
 - While working on your project, work through the second batch of the slide
-  deck. It will become available in mid-February 2020.
+  deck.
 - Produce and make your open science work available to the world.
 - Share your knowledge and maintain what you have done.
 
@@ -86,6 +80,7 @@ The directory structure might grow over time. Currently we have ...
 - `docker`: Contains the docker file for our IDE container.
 - `docs`: Documents or link lists that might be helpful. 
 - `slides`: The source code for the slides that I plan to use in class.
+- `slides_pdf`: PDF-Versions of the slides for those that just want to take a peek.
 - `raw_data`: Here we will store data that we receive from external sources.
 - `resources`: Other external documents that we might use
 
@@ -137,6 +132,7 @@ repos = c(CRAN = 'https://mran.microsoft.com/snapshot/2019-09-25'))
 
 devtools::install_github('bergant/datamodelr')
 devtools::install_github('wmurphyrd/fiftystater')
+devtools::install_github('joachim-gassen/rdfanalysis')
 webshot::install_phantomjs()
 ```
 
